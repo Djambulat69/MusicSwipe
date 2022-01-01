@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:cardBackgroundColor="@color/teal_200"
+    app:cardCornerRadius="15dp"
+    app:strokeColor="@color/purple_200"
+    app:strokeWidth="2dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/track_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            tools:text="track name" />
+
+        <TextView
+            android:id="@+id/track_preview_url"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            tools:text="track preview url" />
+
+        <ImageView
+            android:id="@+id/play_button"
+            android:layout_width="match_parent"
+            android:layout_height="128dp"
+            android:src="@drawable/ic_baseline_play_circle" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>
