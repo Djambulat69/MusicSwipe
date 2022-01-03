@@ -2,6 +2,7 @@ package com.isaev.musicswipe
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.isaev.musicswipe.databinding.TrackCardItemBinding
 
 class TrackViewHolder(view: View, private val mediaPlayer: (position: Int) -> Unit) :
@@ -16,12 +17,31 @@ class TrackViewHolder(view: View, private val mediaPlayer: (position: Int) -> Un
     }
 
     fun bind(playTrack: PlayTrack) {
+        var isFull = false
         with(binding) {
-            trackName.text = playTrack.track.name
-            trackPreviewUrl.text = playTrack.track.previewUrl
+            val fullTrackName = playTrack.track.name
+            if (fullTrackName.length > 30) {
+                trackName.text = playTrack.track.name.take(30) + "..."
+                trackName.setOnClickListener {
+                    if (isFull) {
+                        trackName.text = playTrack.track.name.take(30) + "..."
+                    } else {
+                        trackName.text = playTrack.track.name
+                    }
+                    isFull = !isFull
+                }
+            } else {
+                trackName.text = fullTrackName
+                trackName.setOnClickListener(null)
+            }
+            trackArtists.text = playTrack.track.artists.joinToString(separator = ", ") { it.name }
             playButton.setImageResource(
                 if (playTrack.isPlaying) R.drawable.ic_baseline_pause_circle else R.drawable.ic_baseline_play_circle
             )
+            Glide.with(itemView.context)
+                .load(playTrack.track.album.images.firstOrNull()?.url)
+                .placeholder(R.drawable.ic_baseline_album_placeholder)
+                .into(trackCover)
         }
     }
 }

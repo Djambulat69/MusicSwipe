@@ -5,9 +5,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:cardBackgroundColor="@color/teal_200"
-    app:cardCornerRadius="15dp"
-    app:strokeColor="@color/purple_200"
+    app:cardCornerRadius="16dp"
+    app:strokeColor="@color/teal_200"
     app:strokeWidth="2dp">
 
     <LinearLayout
@@ -16,24 +15,36 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <ImageView
+            android:id="@+id/track_cover"
+            android:layout_width="320dp"
+            android:layout_height="320dp"
+            android:layout_gravity="center_horizontal"
+            tools:src="@drawable/ic_baseline_album_placeholder" />
+
         <TextView
             android:id="@+id/track_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            tools:text="track name" />
+            android:textAppearance="?attr/textAppearanceListItem"
+            android:textSize="28sp"
+            tools:text="Track name" />
 
         <TextView
-            android:id="@+id/track_preview_url"
+            android:id="@+id/track_artists"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            tools:text="track preview url" />
+            android:textAppearance="?attr/textAppearanceListItemSecondary"
+            android:textSize="18sp"
+            tools:text="Artist#1, Artist#2" />
 
         <ImageView
             android:id="@+id/play_button"
-            android:layout_width="match_parent"
+            android:layout_width="128dp"
             android:layout_height="128dp"
+            android:layout_gravity="center_horizontal"
             android:src="@drawable/ic_baseline_play_circle" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

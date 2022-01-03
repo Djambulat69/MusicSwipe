@@ -3,9 +3,12 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/Djamb/AndroidStudioProjects/MusicSwipe/app/src/main/res/drawable/ic_baseline_album_placeholder.xml" value="0.2703125" />
+        <entry key="..\:/Users/Djamb/AndroidStudioProjects/MusicSwipe/app/src/main/res/drawable/ic_baseline_pause_circle.xml" value="0.2703125" />
+        <entry key="..\:/Users/Djamb/AndroidStudioProjects/MusicSwipe/app/src/main/res/drawable/ic_baseline_play_circle.xml" value="0.2703125" />
         <entry key="..\:/Users/Djamb/AndroidStudioProjects/MusicSwipe/app/src/main/res/layout/activity_main.xml" value="0.25416666666666665" />
         <entry key="..\:/Users/Djamb/AndroidStudioProjects/MusicSwipe/app/src/main/res/layout/card_stack_item.xml" value="0.25416666666666665" />
-        <entry key="..\:/Users/Djamb/AndroidStudioProjects/MusicSwipe/app/src/main/res/layout/track_card_item.xml" value="0.25416666666666665" />
+        <entry key="..\:/Users/Djamb/AndroidStudioProjects/MusicSwipe/app/src/main/res/layout/track_card_item.xml" value="0.264" />
       </map>
     </option>
   </component>
