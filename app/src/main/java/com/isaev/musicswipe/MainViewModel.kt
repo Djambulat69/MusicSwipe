@@ -53,7 +53,7 @@ class MainViewModel : ViewModel() {
         if (isLoadingRecommendations) return
         isLoadingRecommendations = true
         viewModelScope.launch {
-//            delay(3000)
+            delay(3000)
             try {
                 val response = spotifyWebApiHelper?.getRecommendations(
                     arrayOf("2RdwBSPQiwcmiDo9kixcl8"),

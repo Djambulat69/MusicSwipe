@@ -33,19 +33,19 @@ class MainActivity : AppCompatActivity() {
                     override fun onCardAppeared(view: View?, position: Int) {
                         if (savedInstanceState != null) { // Prevents preparing track again on rotation
                             val savedTopPosition: Int = savedInstanceState.getInt(CARD_STACK_STATE_KEY)
-                            if (savedTopPosition == position) return
+                            if (savedTopPosition == position || position == 0) return
                         }
 
                         val adapter = cardStack.adapter as TracksAdapter
 
                         val cardsLeft = adapter.itemCount - position
-                        if (cardsLeft < 5) {
+                        if (cardsLeft < TRACKS_PREFETCH_DISTANCE) {
                             viewModel.loadRecommendations()
                         }
 
-                        val playTrack = adapter.tracks[position]
+                        val playTrack = adapter.tracks.getOrNull(position)
 
-                        playTrack.track.previewUrl?.let {
+                        playTrack?.track?.previewUrl?.let {
                             viewModel.prepareNewTrack(playTrack.track.previewUrl, position)
                         }
                     }
@@ -60,11 +60,11 @@ class MainActivity : AppCompatActivity() {
                 setStackFrom(StackFrom.Top)
                 setTranslationInterval(8.0f)
             }
-            cardStack.adapter = TracksAdapter(TracksDiffCallback()) { position ->
-                viewModel.onTrackPlayClicked(position)
-            }
+            cardStack.adapter =
+                TracksAdapter(TracksDiffCallback(), cardStack.layoutManager as CardStackLayoutManager) { position ->
+                    viewModel.onTrackPlayClicked(position)
+                }
         }
-
         viewModel.tracks.observe(this) { tracks ->
             (binding.cardStack.adapter as TracksAdapter).tracks = tracks
         }
@@ -123,5 +123,7 @@ class MainActivity : AppCompatActivity() {
     private companion object {
         const val CLIENT_ID = "ff565d0979aa4da5810b5f3d55057c8f"
         const val CARD_STACK_STATE_KEY = "card_stack_state_key"
+
+        const val TRACKS_PREFETCH_DISTANCE = 5
     }
 }

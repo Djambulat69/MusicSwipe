@@ -4,14 +4,22 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.RecyclerView
+import com.yuyakaido.android.cardstackview.CardStackLayoutManager
 
 class TracksAdapter(
     diffCallback: TracksDiffCallback,
+    private val layoutManager: CardStackLayoutManager,
     private val mediaPlayer: (position: Int) -> Unit
 ) :
     RecyclerView.Adapter<TrackViewHolder>() {
 
-    private val differ = AsyncListDiffer(this, diffCallback)
+    private val differ = AsyncListDiffer(this, diffCallback).apply {
+        addListListener { prevList, _ ->
+            if (layoutManager.topPosition == prevList.size) {
+                layoutManager.cardStackListener.onCardAppeared(layoutManager.topView, layoutManager.topPosition)
+            }
+        }
+    }
 
     var tracks: List<PlayTrack>
         get() = differ.currentList
@@ -29,4 +37,8 @@ class TracksAdapter(
     }
 
     override fun getItemCount(): Int = tracks.size
+
+    private companion object {
+        const val TAG = "TracksAdapter"
+    }
 }
