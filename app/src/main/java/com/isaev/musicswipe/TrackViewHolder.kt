@@ -3,6 +3,7 @@ package com.isaev.musicswipe
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.isaev.musicswipe.databinding.TrackCardItemBinding
 
 class TrackViewHolder(view: View, private val mediaPlayer: (position: Int) -> Unit) :
@@ -40,6 +41,7 @@ class TrackViewHolder(view: View, private val mediaPlayer: (position: Int) -> Un
             )
             Glide.with(itemView.context)
                 .load(playTrack.track.album.images.firstOrNull()?.url)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .placeholder(R.drawable.ic_baseline_album_placeholder)
                 .into(trackCover)
         }
