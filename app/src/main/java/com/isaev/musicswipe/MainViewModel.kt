@@ -7,6 +7,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.collections.ArrayList
@@ -42,7 +45,8 @@ class MainViewModel : ViewModel() {
     private var genreSeed = "pop"
 
     private val _genre = MutableLiveData(genreSeed)
-    val genre: LiveData<String> = _genre
+    private val _playbackUpdates = MutableSharedFlow<PlayTrack>()
+
 
     var token: String? = null
         set(newToken) {
@@ -54,6 +58,9 @@ class MainViewModel : ViewModel() {
         }
 
     val tracks: LiveData<List<PlayTrack>> = _tracks
+    val genre: LiveData<String> = _genre
+
+    val playbackUpdates: SharedFlow<PlayTrack> = _playbackUpdates.asSharedFlow()
 
 
     override fun onCleared() {
@@ -109,11 +116,11 @@ class MainViewModel : ViewModel() {
         if (currentTracks != null) {
             val isPlaying = currentTracks[position].isPlaying
             if (isPlaying) mediaPlayer.pause() else mediaPlayer.start()
+            currentTracks[position].isPlaying = !isPlaying
 
-            val copy = currentTracks.copy()
-            copy[position].isPlaying = !isPlaying
-
-            _tracks.value = copy
+            viewModelScope.launch {
+                _playbackUpdates.emit(currentTracks[position])
+            }
         }
     }
 

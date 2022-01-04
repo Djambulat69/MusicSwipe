@@ -5,6 +5,9 @@ import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.isaev.musicswipe.databinding.FragmentTracksBinding
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
@@ -12,6 +15,7 @@ import com.yuyakaido.android.cardstackview.CardStackLayoutManager
 import com.yuyakaido.android.cardstackview.CardStackListener
 import com.yuyakaido.android.cardstackview.Direction
 import com.yuyakaido.android.cardstackview.StackFrom
+import kotlinx.coroutines.launch
 
 class TracksFragment : Fragment(R.layout.fragment_tracks) {
 
@@ -84,6 +88,17 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
 
         viewModel.genre.observe(viewLifecycleOwner) { genre ->
             binding.genreButton.text = getString(R.string.genre_placeholder, genre)
+        }
+
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.playbackUpdates.collect { playTrack ->
+                    (binding.cardStack.getChildViewHolder(
+                        (binding.cardStack.layoutManager as CardStackLayoutManager).topView
+                    ) as TrackViewHolder).updatePlayback(playTrack)
+                }
+            }
         }
     }
 
