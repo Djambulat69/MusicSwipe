@@ -28,6 +28,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         with(binding) {
+            genreButton.text = getString(R.string.genre_placeholder, "funk")
+
             cardStack.layoutManager = CardStackLayoutManager(
                 this@MainActivity, object : CardStackListener {
                     override fun onCardAppeared(view: View?, position: Int) {
@@ -54,17 +56,28 @@ class MainActivity : AppCompatActivity() {
                     override fun onCardDisappeared(view: View?, position: Int) {}
                     override fun onCardDragging(direction: Direction?, ratio: Float) {}
                     override fun onCardRewound() {}
-                    override fun onCardSwiped(direction: Direction?) {}
+                    override fun onCardSwiped(direction: Direction?) {
+                        if (direction == Direction.Right) {
+                            val position = (cardStack.layoutManager as CardStackLayoutManager).topPosition - 1
+                            val adapter = cardStack.adapter as TracksAdapter
+                            val likedTrack = adapter.tracks.getOrNull(position)
+                            likedTrack?.let {
+                                viewModel.onTrackLiked(likedTrack)
+                            }
+                        }
+                    }
                 }
             ).apply {
                 setStackFrom(StackFrom.Top)
                 setTranslationInterval(8.0f)
             }
+
             cardStack.adapter =
                 TracksAdapter(TracksDiffCallback(), cardStack.layoutManager as CardStackLayoutManager) { position ->
                     viewModel.onTrackPlayClicked(position)
                 }
         }
+
         viewModel.tracks.observe(this) { tracks ->
             (binding.cardStack.adapter as TracksAdapter).tracks = tracks
         }
@@ -121,6 +134,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private companion object {
+        const val TAG = "MainActivity"
+
         const val CLIENT_ID = "ff565d0979aa4da5810b5f3d55057c8f"
         const val CARD_STACK_STATE_KEY = "card_stack_state_key"
 

@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">MusicSwipe</string>
+
+    <string name="genre_placeholder">Genre: %s</string>
 </resources>

@@ -7,8 +7,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.*
+import kotlin.collections.ArrayList
 
 class MainViewModel : ViewModel() {
 
@@ -34,6 +35,12 @@ class MainViewModel : ViewModel() {
         }
     }
 
+    private val trackSeeds: Queue<String> = ArrayDeque<String>(3).apply {
+        addAll(arrayOf("5KmJMi7MiBJtCeJ08lmKzo", "1RUubW9fHtIYwjl588PrhZ", "6xATKzdUO89mZvStODhUSR"))
+    }
+
+    private var artistSeed = "2RdwBSPQiwcmiDo9kixcl8"
+
     var token: String? = null
         set(newToken) {
             field = newToken
@@ -45,6 +52,7 @@ class MainViewModel : ViewModel() {
 
     val tracks: LiveData<List<PlayTrack>> = _tracks
 
+
     override fun onCleared() {
         mediaPlayer.release()
     }
@@ -53,13 +61,12 @@ class MainViewModel : ViewModel() {
         if (isLoadingRecommendations) return
         isLoadingRecommendations = true
         viewModelScope.launch {
-            delay(3000)
             try {
                 val response = spotifyWebApiHelper?.getRecommendations(
-                    arrayOf("2RdwBSPQiwcmiDo9kixcl8"),
+                    arrayOf(artistSeed),
                     arrayOf("funk"),
-                    arrayOf("5KmJMi7MiBJtCeJ08lmKzo", "1RUubW9fHtIYwjl588PrhZ", "6xATKzdUO89mZvStODhUSR"),
-                    20
+                    trackSeeds.toTypedArray(),
+                    10
                 )
 
                 response?.let {
@@ -105,6 +112,12 @@ class MainViewModel : ViewModel() {
 
             _tracks.value = copy
         }
+    }
+
+    fun onTrackLiked(playTrack: PlayTrack) {
+        trackSeeds.poll()
+        trackSeeds.offer(playTrack.track.id)
+        artistSeed = playTrack.track.artists.first().id
     }
 
     private fun List<PlayTrack>.copy(): List<PlayTrack> {
