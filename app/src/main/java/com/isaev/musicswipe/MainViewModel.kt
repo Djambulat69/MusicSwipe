@@ -64,7 +64,7 @@ class MainViewModel : ViewModel() {
             try {
                 val response = spotifyWebApiHelper?.getRecommendations(
                     arrayOf(artistSeed),
-                    arrayOf("funk"),
+                    arrayOf("pop"),
                     trackSeeds.toTypedArray(),
                     10
                 )
