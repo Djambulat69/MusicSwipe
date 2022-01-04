@@ -38,8 +38,11 @@ class MainViewModel : ViewModel() {
     private val trackSeeds: Queue<String> = ArrayDeque<String>(3).apply {
         addAll(arrayOf("5KmJMi7MiBJtCeJ08lmKzo", "1RUubW9fHtIYwjl588PrhZ", "6xATKzdUO89mZvStODhUSR"))
     }
-
     private var artistSeed = "2RdwBSPQiwcmiDo9kixcl8"
+    private var genreSeed = "pop"
+
+    private val _genre = MutableLiveData(genreSeed)
+    val genre: LiveData<String> = _genre
 
     var token: String? = null
         set(newToken) {
@@ -57,16 +60,16 @@ class MainViewModel : ViewModel() {
         mediaPlayer.release()
     }
 
-    fun loadRecommendations() {
+    fun loadRecommendations(limit: Int = 10) {
         if (isLoadingRecommendations) return
         isLoadingRecommendations = true
         viewModelScope.launch {
             try {
                 val response = spotifyWebApiHelper?.getRecommendations(
                     arrayOf(artistSeed),
-                    arrayOf("pop"),
+                    arrayOf(genreSeed),
                     trackSeeds.toTypedArray(),
-                    10
+                    limit
                 )
 
                 response?.let {
@@ -117,7 +120,16 @@ class MainViewModel : ViewModel() {
     fun onTrackLiked(playTrack: PlayTrack) {
         trackSeeds.poll()
         trackSeeds.offer(playTrack.track.id)
-        artistSeed = playTrack.track.artists.first().id
+        val mainArtistId = playTrack.track.artists.first().id
+        artistSeed = mainArtistId
+        viewModelScope.launch {
+            val newGenreSeed: String? = spotifyWebApiHelper?.getArtist(mainArtistId)?.genres?.firstOrNull()
+            newGenreSeed?.let {
+                genreSeed = newGenreSeed
+                _genre.value = newGenreSeed
+            }
+            loadRecommendations(5)
+        }
     }
 
     private fun List<PlayTrack>.copy(): List<PlayTrack> {

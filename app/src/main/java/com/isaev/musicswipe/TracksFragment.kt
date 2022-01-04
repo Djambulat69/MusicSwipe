@@ -30,8 +30,6 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
         }
 
         with(binding) {
-            genreButton.text = getString(R.string.genre_placeholder, "funk")
-
             cardStack.layoutManager = CardStackLayoutManager(
                 requireContext(), object : CardStackListener {
                     override fun onCardAppeared(view: View?, position: Int) {
@@ -80,8 +78,12 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
                 }
         }
 
-        viewModel.tracks.observe(this) { tracks ->
+        viewModel.tracks.observe(viewLifecycleOwner) { tracks ->
             (binding.cardStack.adapter as TracksAdapter).tracks = tracks
+        }
+
+        viewModel.genre.observe(viewLifecycleOwner) { genre ->
+            binding.genreButton.text = getString(R.string.genre_placeholder, genre)
         }
     }
 

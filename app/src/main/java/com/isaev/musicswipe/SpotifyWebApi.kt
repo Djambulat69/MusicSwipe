@@ -1,6 +1,7 @@
 package com.isaev.musicswipe
 
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface SpotifyWebApi {
@@ -12,4 +13,9 @@ interface SpotifyWebApi {
         @Query("seed_tracks") seedTracks: String,
         @Query("limit") limit: Int
     ): RecommendationsResponse
+
+    @GET("artists/{id}")
+    suspend fun getArtist(
+        @Path("id") id: String
+    ): ArtistResponse
 }
