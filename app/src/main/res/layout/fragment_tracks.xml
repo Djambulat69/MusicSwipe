@@ -23,13 +23,12 @@
         android:id="@+id/card_stack"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_margin="12dp"
         android:clipToPadding="false"
         android:padding="16dp"
-        app:layout_constraintBottom_toTopOf="@id/dislike_button"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/genre_button"
+        app:layout_constraintTop_toTopOf="@id/genre_button"
         tools:itemCount="4"
         tools:listitem="@layout/track_card_item" />
 

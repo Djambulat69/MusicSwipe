@@ -4,6 +4,10 @@ import android.os.Bundle
 import android.view.View
 import android.view.animation.AccelerateInterpolator
 import android.widget.Toast
+import androidx.core.view.doOnLayout
+import androidx.core.view.marginBottom
+import androidx.core.view.marginTop
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -87,6 +91,18 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
             likeButton.setOnClickListener {
                 (cardStack.layoutManager as CardStackLayoutManager).setSwipeAnimationSetting(swipeRightSettings)
                 cardStack.swipe()
+            }
+
+            genreButton.doOnLayout {
+                cardStack.updatePadding(
+                    top = genreButton.height + genreButton.marginTop + genreButton.marginBottom + cardStack.paddingTop
+                )
+            }
+            dislikeButton.doOnLayout {
+                cardStack.updatePadding(
+                    bottom = dislikeButton.size +
+                            dislikeButton.marginBottom + dislikeButton.marginTop + cardStack.paddingBottom
+                )
             }
 
             val swipeLeftSettings = SwipeAnimationSetting.Builder()
