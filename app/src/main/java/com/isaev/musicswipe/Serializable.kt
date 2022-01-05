@@ -104,34 +104,33 @@ data class ExternalUrlsXX(
 
 @Serializable
 data class ArtistResponse(
-    @SerialName("external_urls")
-    val externalUrls: ExternalUrls,
-    @SerialName("followers")
-    val followers: Followers,
-    @SerialName("genres")
-    val genres: List<String>,
-    @SerialName("href")
-    val href: String,
-    @SerialName("id")
-    val id: String,
-    @SerialName("images")
-    val images: List<Image>,
-    @SerialName("name")
-    val name: String,
-    @SerialName("popularity")
-    val popularity: Int,
-    @SerialName("type")
-    val type: String,
-    @SerialName("uri")
-    val uri: String
+    @SerialName("external_urls") val externalUrls: ExternalUrls,
+    @SerialName("followers") val followers: Followers,
+    @SerialName("genres") val genres: List<String>,
+    @SerialName("href") val href: String,
+    @SerialName("id") val id: String,
+    @SerialName("images") val images: List<Image>,
+    @SerialName("name") val name: String,
+    @SerialName("popularity") val popularity: Int,
+    @SerialName("type") val type: String,
+    @SerialName("uri") val uri: String
 )
 
 @Serializable
 data class Followers(
-    @SerialName("href")
-    val href: String?,
-    @SerialName("total")
-    val total: Int
+    @SerialName("href") val href: String?,
+    @SerialName("total") val total: Int
 )
 
+// TopTracksResponse
 
+@Serializable
+data class TopTracksResponse(
+    @SerialName("items") val items: List<Track>,
+    @SerialName("total") val total: Int,
+    @SerialName("limit") val limit: Int,
+    @SerialName("offset") val offset: Int,
+    @SerialName("href") val href: String,
+    @SerialName("previous") val previous: String?,
+    @SerialName("next") val next: String?
+)

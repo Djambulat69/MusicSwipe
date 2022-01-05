@@ -119,9 +119,9 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
 
     private fun authorize() {
         val request: AuthorizationRequest = AuthorizationRequest.Builder(
-            CLIENT_ID, AuthorizationResponse.Type.TOKEN, "http://music.swipe.com"
+            CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI
         ).apply {
-            setScopes(arrayOf("user-library-modify", "user-library-read"))
+            setScopes(arrayOf("user-library-modify", "user-library-read", "user-top-read"))
         }.build()
 
         val loginLauncher = getLoginLauncher()
@@ -147,6 +147,7 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
         const val TAG = "TracksFragment"
 
         const val CLIENT_ID = "ff565d0979aa4da5810b5f3d55057c8f"
+        const val REDIRECT_URI = "http://music.swipe.com"
         const val CARD_STACK_STATE_KEY = "card_stack_state_key"
         const val TRACKS_PREFETCH_DISTANCE = 5
     }

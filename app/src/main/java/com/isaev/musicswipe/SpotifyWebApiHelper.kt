@@ -40,6 +40,8 @@ class SpotifyWebApiHelper(token: String) {
 
     suspend fun getArtist(id: String): ArtistResponse = spotifyWebApiService.getArtist(id)
 
+    suspend fun getTopTracks(limit: Int): TopTracksResponse = spotifyWebApiService.getTopTracks(limit)
+
     companion object {
         private const val BASE_URL = "https://api.spotify.com/v1/"
     }

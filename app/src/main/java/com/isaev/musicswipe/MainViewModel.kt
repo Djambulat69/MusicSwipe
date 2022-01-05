@@ -38,9 +38,9 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    private val trackSeeds: Queue<String> = ArrayDeque<String>(3).apply {
-        addAll(arrayOf("5KmJMi7MiBJtCeJ08lmKzo", "1RUubW9fHtIYwjl588PrhZ", "6xATKzdUO89mZvStODhUSR"))
-    }
+    private val trackSeeds: Queue<String> = ArrayDeque<String>(
+        listOf("5KmJMi7MiBJtCeJ08lmKzo", "1RUubW9fHtIYwjl588PrhZ", "6xATKzdUO89mZvStODhUSR")
+    )
     private var artistSeed = "2RdwBSPQiwcmiDo9kixcl8"
     private var genreSeed = "pop"
 
@@ -54,7 +54,11 @@ class MainViewModel : ViewModel() {
             newToken?.let {
                 spotifyWebApiHelper = SpotifyWebApiHelper(newToken)
             }
-            loadRecommendations()
+
+            viewModelScope.launch {
+                loadTopTracksSeeds()
+                loadRecommendations()
+            }
         }
 
     val tracks: LiveData<List<PlayTrack>> = _tracks
@@ -67,23 +71,44 @@ class MainViewModel : ViewModel() {
         mediaPlayer.release()
     }
 
+    suspend fun loadTopTracksSeeds() {
+        val topTracksResponse = spotifyWebApiHelper?.getTopTracks(3)
+        topTracksResponse?.let {
+            val topTracks = topTracksResponse.items
+
+            trackSeeds.clear()
+            trackSeeds.addAll(topTracks.map { it.id })
+
+            val topMainArtistId = topTracks.first().artists.first().id
+
+            artistSeed = topMainArtistId
+
+            val newGenreSeed: String? = spotifyWebApiHelper?.getArtist(topMainArtistId)?.genres?.firstOrNull()
+            newGenreSeed?.let {
+                genreSeed = newGenreSeed
+                _genre.value = newGenreSeed
+            }
+        }
+    }
+
     fun loadRecommendations(limit: Int = 10) {
         if (isLoadingRecommendations) return
         isLoadingRecommendations = true
         viewModelScope.launch {
             try {
-                val response = spotifyWebApiHelper?.getRecommendations(
+                val recommendationsResponse = spotifyWebApiHelper?.getRecommendations(
                     arrayOf(artistSeed),
                     arrayOf(genreSeed),
                     trackSeeds.toTypedArray(),
                     limit
                 )
 
-                response?.let {
-                    val newTracks = response.tracks.filter { it.previewUrl != null }.map { PlayTrack(it) }
+                recommendationsResponse?.let {
+                    val newTracks =
+                        recommendationsResponse.tracks.filter { it.previewUrl != null }.map { PlayTrack(it) }
 
                     _tracks.value = _tracks.value?.plus(newTracks) ?: newTracks
-                    val names = response.tracks.map { it.name }
+                    val names = recommendationsResponse.tracks.map { it.name }
                     Log.i(TAG, names.toString())
                 }
             } catch (e: Exception) {

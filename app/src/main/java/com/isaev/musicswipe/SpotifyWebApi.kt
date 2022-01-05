@@ -18,4 +18,9 @@ interface SpotifyWebApi {
     suspend fun getArtist(
         @Path("id") id: String
     ): ArtistResponse
+
+    @GET("me/top/tracks")
+    suspend fun getTopTracks(
+        @Query("limit") limit: Int
+    ): TopTracksResponse
 }
