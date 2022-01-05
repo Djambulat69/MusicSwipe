@@ -100,8 +100,10 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
             }
             dislikeButton.doOnLayout {
                 cardStack.updatePadding(
-                    bottom = dislikeButton.size +
-                            dislikeButton.marginBottom + dislikeButton.marginTop + cardStack.paddingBottom
+                    bottom = dislikeButton.height +
+                            dislikeButton.marginBottom +
+                            dislikeButton.marginTop +
+                            cardStack.paddingBottom
                 )
             }
 
