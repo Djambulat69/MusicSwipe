@@ -2,6 +2,7 @@ package com.isaev.musicswipe
 
 import android.os.Bundle
 import android.view.View
+import android.view.animation.AccelerateInterpolator
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -11,10 +12,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.isaev.musicswipe.databinding.FragmentTracksBinding
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
-import com.yuyakaido.android.cardstackview.CardStackLayoutManager
-import com.yuyakaido.android.cardstackview.CardStackListener
-import com.yuyakaido.android.cardstackview.Direction
-import com.yuyakaido.android.cardstackview.StackFrom
+import com.yuyakaido.android.cardstackview.*
 import kotlinx.coroutines.launch
 
 class TracksFragment : Fragment(R.layout.fragment_tracks) {
@@ -80,6 +78,26 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
                 TracksAdapter(TracksDiffCallback(), cardStack.layoutManager as CardStackLayoutManager) { position ->
                     viewModel.onTrackPlayClicked(position)
                 }
+
+            val swipeRightSettings = SwipeAnimationSetting.Builder()
+                .setDirection(Direction.Right)
+                .setDuration(Duration.Normal.duration)
+                .setInterpolator(AccelerateInterpolator())
+                .build()
+            likeButton.setOnClickListener {
+                (cardStack.layoutManager as CardStackLayoutManager).setSwipeAnimationSetting(swipeRightSettings)
+                cardStack.swipe()
+            }
+
+            val swipeLeftSettings = SwipeAnimationSetting.Builder()
+                .setDirection(Direction.Left)
+                .setDuration(Duration.Normal.duration)
+                .setInterpolator(AccelerateInterpolator())
+                .build()
+            dislikeButton.setOnClickListener {
+                (cardStack.layoutManager as CardStackLayoutManager).setSwipeAnimationSetting(swipeLeftSettings)
+                cardStack.swipe()
+            }
         }
 
         viewModel.tracks.observe(viewLifecycleOwner) { tracks ->

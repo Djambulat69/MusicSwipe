@@ -28,7 +28,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:textAppearance="?attr/textAppearanceListItem"
-            android:textSize="28sp"
+            android:textSize="22sp"
             tools:text="Track name" />
 
         <TextView
@@ -37,13 +37,13 @@
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:textAppearance="?attr/textAppearanceListItemSecondary"
-            android:textSize="18sp"
+            android:textSize="16sp"
             tools:text="Artist#1, Artist#2" />
 
         <ImageView
             android:id="@+id/play_button"
-            android:layout_width="128dp"
-            android:layout_height="128dp"
+            android:layout_width="92dp"
+            android:layout_height="92dp"
             android:layout_gravity="center_horizontal"
             android:src="@drawable/ic_baseline_play_circle" />
     </LinearLayout>
