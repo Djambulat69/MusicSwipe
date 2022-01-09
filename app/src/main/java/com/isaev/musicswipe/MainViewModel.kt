@@ -44,7 +44,6 @@ class MainViewModel : ViewModel() {
     private var artistSeed = "2RdwBSPQiwcmiDo9kixcl8"
     private var genreSeed = "pop"
 
-    private val _genre = MutableLiveData(genreSeed)
     private val _playbackUpdates = MutableSharedFlow<PlayTrack>()
 
 
@@ -62,33 +61,12 @@ class MainViewModel : ViewModel() {
         }
 
     val tracks: LiveData<List<PlayTrack>> = _tracks
-    val genre: LiveData<String> = _genre
 
     val playbackUpdates: SharedFlow<PlayTrack> = _playbackUpdates.asSharedFlow()
 
 
     override fun onCleared() {
         mediaPlayer.release()
-    }
-
-    suspend fun loadTopTracksSeeds() {
-        val topTracksResponse = spotifyWebApiHelper?.getTopTracks(3)
-        topTracksResponse?.let {
-            val topTracks = topTracksResponse.items
-
-            trackSeeds.clear()
-            trackSeeds.addAll(topTracks.map { it.id })
-
-            val topMainArtistId = topTracks.first().artists.first().id
-
-            artistSeed = topMainArtistId
-
-            val newGenreSeed: String? = spotifyWebApiHelper?.getArtist(topMainArtistId)?.genres?.firstOrNull()
-            newGenreSeed?.let {
-                genreSeed = newGenreSeed
-                _genre.value = newGenreSeed
-            }
-        }
     }
 
     fun loadRecommendations(limit: Int = 10) {
@@ -162,12 +140,34 @@ class MainViewModel : ViewModel() {
         val mainArtistId = playTrack.track.artists.first().id
         artistSeed = mainArtistId
         viewModelScope.launch {
-            val newGenreSeed: String? = spotifyWebApiHelper?.getArtist(mainArtistId)?.genres?.firstOrNull()
+            try {
+                val newGenreSeed: String? = spotifyWebApiHelper?.getArtist(mainArtistId)?.genres?.firstOrNull()
+                newGenreSeed?.let {
+                    genreSeed = newGenreSeed
+                }
+                loadRecommendations(5)
+            } catch (e: Throwable) {
+                Log.i(TAG, "onTrackLiked: ${e.stackTraceToString()}")
+            }
+        }
+    }
+
+    private suspend fun loadTopTracksSeeds() {
+        val topTracksResponse = spotifyWebApiHelper?.getTopTracks(3)
+        topTracksResponse?.let {
+            val topTracks = topTracksResponse.items
+
+            trackSeeds.clear()
+            trackSeeds.addAll(topTracks.map { it.id })
+
+            val topMainArtistId = topTracks.first().artists.first().id
+
+            artistSeed = topMainArtistId
+
+            val newGenreSeed: String? = spotifyWebApiHelper?.getArtist(topMainArtistId)?.genres?.firstOrNull()
             newGenreSeed?.let {
                 genreSeed = newGenreSeed
-                _genre.value = newGenreSeed
             }
-            loadRecommendations(5)
         }
     }
 

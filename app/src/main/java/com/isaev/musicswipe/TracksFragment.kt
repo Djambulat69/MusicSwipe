@@ -16,7 +16,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.google.android.material.snackbar.Snackbar
 import com.isaev.musicswipe.databinding.FragmentTracksBinding
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
@@ -97,9 +96,12 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
                 cardStack.swipe()
             }
 
-            genreButton.doOnLayout {
+            spotifyButton.doOnLayout {
                 cardStack.updatePadding(
-                    top = genreButton.height + genreButton.marginTop + genreButton.marginBottom + cardStack.paddingTop
+                    top = spotifyButton.height +
+                            spotifyButton.marginTop +
+                            spotifyButton.marginBottom +
+                            cardStack.paddingTop
                 )
             }
             dislikeButton.doOnLayout {
@@ -126,11 +128,6 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
             (binding.cardStack.adapter as TracksAdapter).tracks = tracks
         }
 
-        viewModel.genre.observe(viewLifecycleOwner) { genre ->
-            binding.genreButton.text = getString(R.string.genre_placeholder, genre)
-        }
-
-
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.playbackUpdates.collect { playTrack ->
@@ -149,19 +146,23 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
                 false
             }
 
-        Snackbar.make(requireView(), "installed=$installedSpotify", Snackbar.LENGTH_SHORT).show()
-        binding.genreButton.setOnClickListener {
-            val topTrack = getCurrentPlayTrack()?.track
-            if (installedSpotify && topTrack != null) {
-                val intent = Intent().apply {
-                    action = Intent.ACTION_VIEW
-                    data = Uri.parse(topTrack.uri)
-                    putExtra(
-                        Intent.EXTRA_REFERRER, Uri.parse("android-app://${requireContext().packageName}")
-                    )
+        if (installedSpotify) {
+            binding.spotifyButton.text = getString(R.string.open_in_spotify)
+            binding.spotifyButton.setOnClickListener {
+                val topTrack = getCurrentPlayTrack()?.track
+                if (topTrack != null) {
+                    val intent = Intent().apply {
+                        action = Intent.ACTION_VIEW
+                        data = Uri.parse(topTrack.uri)
+                        putExtra(
+                            Intent.EXTRA_REFERRER, Uri.parse("android-app://${requireContext().packageName}")
+                        )
+                    }
+                    startActivity(intent)
                 }
-                startActivity(intent)
             }
+        } else {
+            binding.spotifyButton.text = getString(R.string.download_spotify)
         }
     }
 

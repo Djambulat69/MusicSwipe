@@ -7,28 +7,32 @@
     tools:context=".MainActivity">
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/genre_button"
+        android:id="@+id/spotify_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/genre_placeholder"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="10dp"
+        android:textStyle="bold"
+        app:backgroundTint="@color/light_green_a900"
         app:icon="@drawable/ic_baseline_music_note"
         app:iconGravity="end"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:shapeAppearance="@style/ShapeAppearance.App.MediumComponent.RoundCorners"
-        tools:text="Genre: Pop" />
+        tools:text="open in spotify" />
 
     <com.yuyakaido.android.cardstackview.CardStackView
         android:id="@+id/card_stack"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:clipToPadding="false"
-        android:padding="16dp"
+        android:paddingHorizontal="32dp"
+        android:paddingVertical="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/genre_button"
+        app:layout_constraintTop_toTopOf="@id/spotify_button"
         tools:itemCount="4"
         tools:listitem="@layout/track_card_item" />
 
