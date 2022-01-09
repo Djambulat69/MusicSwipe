@@ -139,13 +139,20 @@ class MainViewModel : ViewModel() {
         val currentTracks = _tracks.value
 
         if (currentTracks != null) {
-            val isPlaying = currentTracks[position].isPlaying
-            if (isPlaying) mediaPlayer.pause() else mediaPlayer.start()
-            currentTracks[position].isPlaying = !isPlaying
+            onTrackPlayClicked(currentTracks[position])
+        }
+    }
 
-            viewModelScope.launch {
-                _playbackUpdates.emit(currentTracks[position])
-            }
+    fun onTrackPlayClicked(playTrack: PlayTrack) {
+        if (isPreparing) return
+
+        val isPlaying = playTrack.isPlaying
+
+        if (isPlaying) mediaPlayer.pause() else mediaPlayer.start()
+        playTrack.isPlaying = !isPlaying
+
+        viewModelScope.launch {
+            _playbackUpdates.emit(playTrack)
         }
     }
 

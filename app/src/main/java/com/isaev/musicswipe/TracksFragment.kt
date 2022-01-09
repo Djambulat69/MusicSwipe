@@ -1,5 +1,8 @@
 package com.isaev.musicswipe
 
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.animation.AccelerateInterpolator
@@ -13,6 +16,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.google.android.material.snackbar.Snackbar
 import com.isaev.musicswipe.databinding.FragmentTracksBinding
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
@@ -127,7 +131,7 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
         }
 
 
-        viewLifecycleOwner.lifecycleScope.launch {
+        lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.playbackUpdates.collect { playTrack ->
                     (binding.cardStack.getChildViewHolder(
@@ -135,6 +139,47 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
                     ) as TrackViewHolder).updatePlayback(playTrack)
                 }
             }
+        }
+
+        val installedSpotify =
+            try {
+                requireContext().packageManager.getPackageInfo("com.spotify.music", 0)
+                true
+            } catch (e: PackageManager.NameNotFoundException) {
+                false
+            }
+
+        Snackbar.make(requireView(), "installed=$installedSpotify", Snackbar.LENGTH_SHORT).show()
+        binding.genreButton.setOnClickListener {
+            val topTrack = getCurrentPlayTrack()?.track
+            if (installedSpotify && topTrack != null) {
+                val intent = Intent().apply {
+                    action = Intent.ACTION_VIEW
+                    data = Uri.parse(topTrack.uri)
+                    putExtra(
+                        Intent.EXTRA_REFERRER, Uri.parse("android-app://${requireContext().packageName}")
+                    )
+                }
+                startActivity(intent)
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val topTrack = getCurrentPlayTrack()
+        if (topTrack != null && !topTrack.isPlaying) {
+            viewModel.onTrackPlayClicked(topTrack)
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        val topTrack = getCurrentPlayTrack()
+        if (topTrack != null && topTrack.isPlaying) {
+            viewModel.onTrackPlayClicked(topTrack)
         }
     }
 
@@ -176,6 +221,13 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
                         .show()
                 }
             }
+        }
+    }
+
+    private fun getCurrentPlayTrack(): PlayTrack? {
+        val position = (binding.cardStack.layoutManager as CardStackLayoutManager?)?.topPosition
+        return position?.let {
+            (binding.cardStack.adapter as TracksAdapter).tracks.getOrNull(position)
         }
     }
 

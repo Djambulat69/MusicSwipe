@@ -1,9 +1,11 @@
 package com.isaev.musicswipe
 
+import android.util.Log
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json
-import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 
 class SpotifyWebApiHelper(token: String) {
@@ -18,9 +20,16 @@ class SpotifyWebApiHelper(token: String) {
         .client(
             OkHttpClient.Builder()
                 .addInterceptor(AuthInterceptor(token))
+                .addInterceptor(
+                    HttpLoggingInterceptor { message ->
+                        Log.i(TAG, message)
+                    }.apply {
+                        level = HttpLoggingInterceptor.Level.BODY
+                    }
+                )
                 .build()
         )
-        .addConverterFactory(json.asConverterFactory(MediaType.parse("application/json")!!))
+        .addConverterFactory(json.asConverterFactory(("application/json").toMediaType()))
         .build()
 
     private val spotifyWebApiService = retrofit.create(SpotifyWebApi::class.java)
@@ -43,6 +52,7 @@ class SpotifyWebApiHelper(token: String) {
     suspend fun getTopTracks(limit: Int): TopTracksResponse = spotifyWebApiService.getTopTracks(limit)
 
     companion object {
+        private const val TAG = "SpotifyWebApiHelper"
         private const val BASE_URL = "https://api.spotify.com/v1/"
     }
 }
