@@ -5,8 +5,6 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.view.animation.AccelerateInterpolator
-import android.widget.Toast
 import androidx.core.view.doOnLayout
 import androidx.core.view.marginBottom
 import androidx.core.view.marginTop
@@ -19,7 +17,10 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.isaev.musicswipe.databinding.FragmentTracksBinding
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
-import com.yuyakaido.android.cardstackview.*
+import com.yuyakaido.android.cardstackview.CardStackLayoutManager
+import com.yuyakaido.android.cardstackview.CardStackListener
+import com.yuyakaido.android.cardstackview.Direction
+import com.yuyakaido.android.cardstackview.StackFrom
 import kotlinx.coroutines.launch
 
 class TracksFragment : Fragment(R.layout.fragment_tracks) {
@@ -35,7 +36,7 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
         if (savedInstanceState == null) {
             authorize()
         } else {
-            onRestoreInstanceState(savedInstanceState)
+            restoreViewState(savedInstanceState)
         }
 
         with(binding) {
@@ -86,14 +87,8 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
                     viewModel.onTrackPlayClicked(position)
                 }
 
-            val swipeRightSettings = SwipeAnimationSetting.Builder()
-                .setDirection(Direction.Right)
-                .setDuration(Duration.Normal.duration)
-                .setInterpolator(AccelerateInterpolator())
-                .build()
             likeButton.setOnClickListener {
-                (cardStack.layoutManager as CardStackLayoutManager).setSwipeAnimationSetting(swipeRightSettings)
-                cardStack.swipe()
+                cardStack.swipeRight()
             }
 
             spotifyButton.doOnLayout {
@@ -113,14 +108,8 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
                 )
             }
 
-            val swipeLeftSettings = SwipeAnimationSetting.Builder()
-                .setDirection(Direction.Left)
-                .setDuration(Duration.Normal.duration)
-                .setInterpolator(AccelerateInterpolator())
-                .build()
             dislikeButton.setOnClickListener {
-                (cardStack.layoutManager as CardStackLayoutManager).setSwipeAnimationSetting(swipeLeftSettings)
-                cardStack.swipe()
+                cardStack.swipeLeft()
             }
         }
 
@@ -191,36 +180,23 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
 
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putInt(CARD_STACK_STATE_KEY, (binding.cardStack.layoutManager as CardStackLayoutManager).topPosition)
-        super.onSaveInstanceState(outState)
     }
 
-    private fun onRestoreInstanceState(savedInstanceState: Bundle) {
+    private fun restoreViewState(savedInstanceState: Bundle) {
         val savedTopPosition: Int = savedInstanceState.getInt(CARD_STACK_STATE_KEY)
         (binding.cardStack.layoutManager as CardStackLayoutManager).topPosition = savedTopPosition
     }
 
     private fun authorize() {
-        val request: AuthorizationRequest = AuthorizationRequest.Builder(
-            CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI
-        ).apply {
-            setScopes(arrayOf("user-library-modify", "user-library-read", "user-top-read"))
-        }.build()
-
-        val loginLauncher = getLoginLauncher()
-        loginLauncher.launch(request)
+        val request: AuthorizationRequest = AuthorizationManager.request()
+        getLoginLauncher().launch(request)
     }
 
     private fun getLoginLauncher() = registerForActivityResult(SpotifyLoginActivityResultContract()) { response ->
         response?.let {
             when (response.type) {
-                AuthorizationResponse.Type.TOKEN -> {
-                    viewModel.token = response.accessToken
-                }
-                else -> {
-                    Toast
-                        .makeText(requireContext(), "Something went wrong. ${response.type.name}", Toast.LENGTH_SHORT)
-                        .show()
-                }
+                AuthorizationResponse.Type.TOKEN -> viewModel.token = response.accessToken
+                else -> snackBar("Something went wrong. ${response.type.name}").show()
             }
         }
     }
@@ -235,8 +211,6 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
     private companion object {
         const val TAG = "TracksFragment"
 
-        const val CLIENT_ID = "ff565d0979aa4da5810b5f3d55057c8f"
-        const val REDIRECT_URI = "http://music.swipe.com"
         const val CARD_STACK_STATE_KEY = "card_stack_state_key"
         const val TRACKS_PREFETCH_DISTANCE = 5
     }
