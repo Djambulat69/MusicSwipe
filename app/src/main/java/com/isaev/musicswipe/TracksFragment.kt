@@ -18,8 +18,6 @@ import com.isaev.musicswipe.databinding.FragmentTracksBinding
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
 import com.yuyakaido.android.cardstackview.CardStackLayoutManager
-import com.yuyakaido.android.cardstackview.CardStackListener
-import com.yuyakaido.android.cardstackview.Direction
 import com.yuyakaido.android.cardstackview.StackFrom
 import kotlinx.coroutines.launch
 
@@ -41,42 +39,7 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
 
         with(binding) {
             cardStack.layoutManager = CardStackLayoutManager(
-                requireContext(), object : CardStackListener {
-                    override fun onCardAppeared(view: View?, position: Int) {
-                        if (savedInstanceState != null) { // Prevents preparing track again on rotation
-                            val savedTopPosition: Int = savedInstanceState.getInt(CARD_STACK_STATE_KEY)
-                            if (savedTopPosition == position || position == 0) return
-                        }
-
-                        val adapter = cardStack.adapter as TracksAdapter
-
-                        val cardsLeft = adapter.itemCount - position
-                        if (cardsLeft < TRACKS_PREFETCH_DISTANCE) {
-                            viewModel.loadRecommendations()
-                        }
-
-                        val playTrack = adapter.tracks.getOrNull(position)
-
-                        playTrack?.track?.previewUrl?.let {
-                            viewModel.prepareNewTrack(playTrack.track.previewUrl, position)
-                        }
-                    }
-
-                    override fun onCardCanceled() {}
-                    override fun onCardDisappeared(view: View?, position: Int) {}
-                    override fun onCardDragging(direction: Direction?, ratio: Float) {}
-                    override fun onCardRewound() {}
-                    override fun onCardSwiped(direction: Direction?) {
-                        if (direction == Direction.Right) {
-                            val position = (cardStack.layoutManager as CardStackLayoutManager).topPosition - 1
-                            val adapter = cardStack.adapter as TracksAdapter
-                            val likedTrack = adapter.tracks.getOrNull(position)
-                            likedTrack?.let {
-                                viewModel.onTrackLiked(likedTrack)
-                            }
-                        }
-                    }
-                }
+                requireContext(), TracksCardStackListener(viewModel, cardStack) { savedInstanceState }
             ).apply {
                 setStackFrom(StackFrom.Top)
                 setTranslationInterval(8.0f)
@@ -90,26 +53,21 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
             likeButton.setOnClickListener {
                 cardStack.swipeRight()
             }
+            dislikeButton.setOnClickListener {
+                cardStack.swipeLeft()
+            }
 
             spotifyButton.doOnLayout {
                 cardStack.updatePadding(
-                    top = spotifyButton.height +
-                            spotifyButton.marginTop +
-                            spotifyButton.marginBottom +
+                    top = spotifyButton.height + spotifyButton.marginTop + spotifyButton.marginBottom +
                             cardStack.paddingTop
                 )
             }
             dislikeButton.doOnLayout {
                 cardStack.updatePadding(
-                    bottom = dislikeButton.height +
-                            dislikeButton.marginBottom +
-                            dislikeButton.marginTop +
+                    bottom = dislikeButton.height + dislikeButton.marginBottom + dislikeButton.marginTop +
                             cardStack.paddingBottom
                 )
-            }
-
-            dislikeButton.setOnClickListener {
-                cardStack.swipeLeft()
             }
         }
 
@@ -208,10 +166,9 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
         }
     }
 
-    private companion object {
+    companion object {
         const val TAG = "TracksFragment"
 
         const val CARD_STACK_STATE_KEY = "card_stack_state_key"
-        const val TRACKS_PREFETCH_DISTANCE = 5
     }
 }
