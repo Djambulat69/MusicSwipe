@@ -95,7 +95,7 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
                 false
             }
 
-        if (!installedSpotify) {
+        if (installedSpotify) {
             binding.spotifyButton.text = getString(R.string.open_in_spotify)
             binding.spotifyButton.setOnClickListener {
                 getCurrentPlayTrack()?.track?.let { topTrack ->
