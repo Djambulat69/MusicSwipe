@@ -43,7 +43,8 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
                 requireContext(), TracksCardStackListener(viewModel, cardStack) { savedInstanceState }
             ).apply {
                 setStackFrom(StackFrom.Top)
-                setTranslationInterval(8.0f)
+                setTranslationInterval(8f)
+                setMaxDegree(60f)
             }
 
             cardStack.adapter =
@@ -97,40 +98,14 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
         if (!installedSpotify) {
             binding.spotifyButton.text = getString(R.string.open_in_spotify)
             binding.spotifyButton.setOnClickListener {
-                val topTrack = getCurrentPlayTrack()?.track
-                if (topTrack != null) {
-                    val intent = Intent().apply {
-                        action = Intent.ACTION_VIEW
-                        data = Uri.parse(topTrack.uri)
-                        putExtra(
-                            Intent.EXTRA_REFERRER, Uri.parse("android-app://${requireContext().packageName}")
-                        )
-                    }
-                    startActivity(intent)
+                getCurrentPlayTrack()?.track?.let { topTrack ->
+                    openTrackInSpotifyApp(topTrack.uri)
                 }
             }
         } else {
             binding.spotifyButton.text = getString(R.string.download_spotify)
             binding.spotifyButton.setOnClickListener {
-                val appPackageName = "com.spotify.music"
-                val referrer =
-                    "adjust_campaign=${requireContext().packageName}&adjust_tracker=ndjczk&utm_source=adjust_preinstall"
-
-                try {
-                    val uri = Uri.parse("market://details")
-                        .buildUpon()
-                        .appendQueryParameter("id", appPackageName)
-                        .appendQueryParameter("referrer", referrer)
-                        .build()
-                    startActivity(Intent(Intent.ACTION_VIEW, uri))
-                } catch (_: ActivityNotFoundException) {
-                    val uri = Uri.parse("https://play.google.com/store/apps/details")
-                        .buildUpon()
-                        .appendQueryParameter("id", appPackageName)
-                        .appendQueryParameter("referrer", referrer)
-                        .build()
-                    startActivity(Intent(Intent.ACTION_VIEW, uri))
-                }
+                openSpotifyInGooglePlayStore()
             }
         }
     }
@@ -186,6 +161,39 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
         return position?.let {
             (binding.cardStack.adapter as TracksAdapter).tracks.getOrNull(position)
         }
+    }
+
+    private fun openSpotifyInGooglePlayStore() {
+        val appPackageName = "com.spotify.music"
+        val referrer =
+            "adjust_campaign=${requireContext().packageName}&adjust_tracker=ndjczk&utm_source=adjust_preinstall"
+
+        try {
+            val uri = Uri.parse("market://details")
+                .buildUpon()
+                .appendQueryParameter("id", appPackageName)
+                .appendQueryParameter("referrer", referrer)
+                .build()
+            startActivity(Intent(Intent.ACTION_VIEW, uri))
+        } catch (_: ActivityNotFoundException) {
+            val uri = Uri.parse("https://play.google.com/store/apps/details")
+                .buildUpon()
+                .appendQueryParameter("id", appPackageName)
+                .appendQueryParameter("referrer", referrer)
+                .build()
+            startActivity(Intent(Intent.ACTION_VIEW, uri))
+        }
+    }
+
+    private fun openTrackInSpotifyApp(trackUri: String) {
+        val intent = Intent().apply {
+            action = Intent.ACTION_VIEW
+            data = Uri.parse(trackUri)
+            putExtra(
+                Intent.EXTRA_REFERRER, Uri.parse("android-app://${requireContext().packageName}")
+            )
+        }
+        startActivity(intent)
     }
 
     companion object {
