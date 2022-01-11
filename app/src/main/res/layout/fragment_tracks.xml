@@ -6,6 +6,14 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/tracks_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:layout_constraintTop_toTopOf="parent"
+        app:menu="@menu/login_menu"
+        app:title="@string/app_name" />
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/spotify_button"
         android:layout_width="wrap_content"
@@ -18,7 +26,7 @@
         app:iconGravity="end"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tracks_toolbar"
         app:shapeAppearance="@style/ShapeAppearance.App.MediumComponent.RoundCorners"
         tools:text="open in spotify" />
 
