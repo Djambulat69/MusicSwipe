@@ -1,5 +1,6 @@
 package com.isaev.musicswipe
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -93,7 +94,7 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
                 false
             }
 
-        if (installedSpotify) {
+        if (!installedSpotify) {
             binding.spotifyButton.text = getString(R.string.open_in_spotify)
             binding.spotifyButton.setOnClickListener {
                 val topTrack = getCurrentPlayTrack()?.track
@@ -110,6 +111,27 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
             }
         } else {
             binding.spotifyButton.text = getString(R.string.download_spotify)
+            binding.spotifyButton.setOnClickListener {
+                val appPackageName = "com.spotify.music"
+                val referrer =
+                    "adjust_campaign=${requireContext().packageName}&adjust_tracker=ndjczk&utm_source=adjust_preinstall"
+
+                try {
+                    val uri = Uri.parse("market://details")
+                        .buildUpon()
+                        .appendQueryParameter("id", appPackageName)
+                        .appendQueryParameter("referrer", referrer)
+                        .build()
+                    startActivity(Intent(Intent.ACTION_VIEW, uri))
+                } catch (_: ActivityNotFoundException) {
+                    val uri = Uri.parse("https://play.google.com/store/apps/details")
+                        .buildUpon()
+                        .appendQueryParameter("id", appPackageName)
+                        .appendQueryParameter("referrer", referrer)
+                        .build()
+                    startActivity(Intent(Intent.ACTION_VIEW, uri))
+                }
+            }
         }
     }
 
