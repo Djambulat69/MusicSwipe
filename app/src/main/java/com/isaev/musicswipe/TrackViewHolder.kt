@@ -16,12 +16,13 @@ class TrackViewHolder(view: View) :
         with(binding) {
             val fullTrackName = playTrack.track.name
             if (fullTrackName.length > 30) {
-                trackName.text = playTrack.track.name.take(30) + "..."
+                val trunkedTitle = context.getString(R.string.trunked_title, playTrack.track.name.take(30))
+                trackName.text = trunkedTitle
                 trackName.setOnClickListener {
                     if (isFull) {
-                        trackName.text = playTrack.track.name.take(30) + "..."
+                        trackName.text = trunkedTitle
                     } else {
-                        trackName.text = playTrack.track.name
+                        trackName.text = fullTrackName
                     }
                     isFull = !isFull
                 }

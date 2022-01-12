@@ -1,7 +1,9 @@
 package com.isaev.musicswipe
 
+import android.content.Context
 import android.view.animation.AccelerateInterpolator
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.yuyakaido.android.cardstackview.*
 
@@ -30,3 +32,6 @@ fun CardStackView.swipeRight() {
     (layoutManager as CardStackLayoutManager).setSwipeAnimationSetting(swipeRightSettings)
     swipe()
 }
+
+val RecyclerView.ViewHolder.context: Context
+    get() = itemView.context
