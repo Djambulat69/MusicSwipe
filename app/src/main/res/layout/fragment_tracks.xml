@@ -21,14 +21,16 @@
         android:paddingHorizontal="16dp"
         android:paddingVertical="10dp"
         android:textStyle="bold"
-        app:backgroundTint="@color/light_green_a900"
-        app:icon="@drawable/ic_baseline_music_note"
-        app:iconGravity="end"
+        app:backgroundTint="?attr/colorSecondary"
+        app:icon="@drawable/spotify_icon_green"
+        app:iconGravity="start"
+        app:iconSize="24dp"
+        app:iconTint="?attr/colorOnPrimary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tracks_toolbar"
         app:shapeAppearance="@style/ShapeAppearance.App.MediumComponent.RoundCorners"
-        tools:text="open in spotify" />
+        tools:text="@string/get_spotify_free" />
 
     <com.yuyakaido.android.cardstackview.CardStackView
         android:id="@+id/card_stack"

@@ -32,6 +32,14 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         _binding = FragmentTracksBinding.bind(view)
 
+        binding.cardStack.layoutManager = CardStackLayoutManager(
+            requireContext(), TracksCardStackListener(viewModel, binding.cardStack) { savedInstanceState }
+        ).apply {
+            setStackFrom(StackFrom.Top)
+            setTranslationInterval(8f)
+            setMaxDegree(60f)
+        }
+
         if (savedInstanceState == null) {
             authorize()
         } else {
@@ -39,14 +47,6 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
         }
 
         with(binding) {
-            cardStack.layoutManager = CardStackLayoutManager(
-                requireContext(), TracksCardStackListener(viewModel, cardStack) { savedInstanceState }
-            ).apply {
-                setStackFrom(StackFrom.Top)
-                setTranslationInterval(8f)
-                setMaxDegree(60f)
-            }
-
             cardStack.adapter =
                 TracksAdapter(TracksDiffCallback(), cardStack.layoutManager as CardStackLayoutManager) { position ->
                     viewModel.onTrackPlayClicked(position)
@@ -80,9 +80,9 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.playbackUpdates.collect { playTrack ->
-                    (binding.cardStack.getChildViewHolder(
-                        (binding.cardStack.layoutManager as CardStackLayoutManager).topView
-                    ) as TrackViewHolder).updatePlayback(playTrack)
+                    (binding.cardStack.layoutManager as CardStackLayoutManager).topView?.let { topView ->
+                        (binding.cardStack.getChildViewHolder(topView) as? TrackViewHolder)?.updatePlayback(playTrack)
+                    }
                 }
             }
         }
@@ -96,14 +96,14 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
             }
 
         if (installedSpotify) {
-            binding.spotifyButton.text = getString(R.string.open_in_spotify)
+            binding.spotifyButton.text = getString(R.string.open_spotify)
             binding.spotifyButton.setOnClickListener {
                 getCurrentPlayTrack()?.track?.let { topTrack ->
                     openTrackInSpotifyApp(topTrack.uri)
                 }
             }
         } else {
-            binding.spotifyButton.text = getString(R.string.download_spotify)
+            binding.spotifyButton.text = getString(R.string.get_spotify_free)
             binding.spotifyButton.setOnClickListener {
                 openSpotifyInGooglePlayStore()
             }

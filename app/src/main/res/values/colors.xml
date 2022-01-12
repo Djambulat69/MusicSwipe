@@ -9,4 +9,7 @@
     <color name="white">#FFFFFFFF</color>
     <color name="red_900">#b71c1c</color>
     <color name="light_green_a900">#64dd17</color>
+
+    <color name="spotify_green">#1DB954</color>
+    <color name="spotify_black">#191414</color>
 </resources>

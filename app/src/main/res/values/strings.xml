@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">MusicSwipe</string>
 
-    <string name="open_in_spotify">Open in Spotify</string>
-    <string name="download_spotify">Download Spotify</string>
+    <string name="open_spotify">OPEN SPOTIFY</string>
+    <string name="get_spotify_free">GET SPOTIFY FREE</string>
     <string name="profile">Profile</string>
 </resources>

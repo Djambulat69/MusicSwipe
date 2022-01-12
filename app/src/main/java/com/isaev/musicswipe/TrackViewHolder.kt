@@ -20,6 +20,11 @@ class TrackViewHolder(view: View, private val mediaPlayer: (position: Int) -> Un
     fun bind(playTrack: PlayTrack) {
         var isFull = false
         with(binding) {
+            /*spotifyLogo.updateLayoutParams {
+                height = itemView.context.resources.getDimensionPixelSize(
+                    itemView.context.resources.getDimension(70).toInt()
+                )
+            }*/
             val fullTrackName = playTrack.track.name
             if (fullTrackName.length > 30) {
                 trackName.text = playTrack.track.name.take(30) + "..."
