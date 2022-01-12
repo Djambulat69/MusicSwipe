@@ -8,7 +8,7 @@ import com.yuyakaido.android.cardstackview.CardStackView
 import com.yuyakaido.android.cardstackview.Direction
 
 class TracksCardStackListener(
-    private val viewModel: MainViewModel,
+    private val viewModel: TracksViewModel,
     private val cardStack: CardStackView,
     private val getSavedInstanceState: () -> Bundle?
 ) : CardStackListener {

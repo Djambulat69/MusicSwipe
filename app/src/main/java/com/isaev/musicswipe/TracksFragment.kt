@@ -6,28 +6,20 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import androidx.core.view.doOnLayout
-import androidx.core.view.marginBottom
-import androidx.core.view.marginTop
-import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.isaev.musicswipe.databinding.FragmentTracksBinding
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
 import com.yuyakaido.android.cardstackview.CardStackLayoutManager
 import com.yuyakaido.android.cardstackview.StackFrom
-import kotlinx.coroutines.launch
 
 class TracksFragment : Fragment(R.layout.fragment_tracks) {
 
     private var _binding: FragmentTracksBinding? = null
     private val binding: FragmentTracksBinding get() = _binding!!
 
-    private val viewModel: MainViewModel by viewModels()
+    private val viewModel: TracksViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         _binding = FragmentTracksBinding.bind(view)
@@ -58,18 +50,10 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
             dislikeButton.setOnClickListener {
                 cardStack.swipeLeft()
             }
-
-            spotifyButton.doOnLayout {
-                cardStack.updatePadding(
-                    top = spotifyButton.height + spotifyButton.marginTop + spotifyButton.marginBottom +
-                            cardStack.paddingTop
-                )
-            }
-            dislikeButton.doOnLayout {
-                cardStack.updatePadding(
-                    bottom = dislikeButton.height + dislikeButton.marginBottom + dislikeButton.marginTop +
-                            cardStack.paddingBottom
-                )
+            playbackButton.setOnClickListener {
+                getCurrentPlayTrack()?.let { topTrack ->
+                    viewModel.onTrackPlayClicked(topTrack)
+                }
             }
         }
 
@@ -77,14 +61,10 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
             (binding.cardStack.adapter as TracksAdapter).tracks = tracks
         }
 
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.playbackUpdates.collect { playTrack ->
-                    (binding.cardStack.layoutManager as CardStackLayoutManager).topView?.let { topView ->
-                        (binding.cardStack.getChildViewHolder(topView) as? TrackViewHolder)?.updatePlayback(playTrack)
-                    }
-                }
-            }
+        viewModel.playback.observe(viewLifecycleOwner) { isPlaying ->
+            binding.playbackButton.setImageResource(
+                if (isPlaying) R.drawable.ic_baseline_pause else R.drawable.ic_baseline_play_arrow
+            )
         }
 
         val installedSpotify =

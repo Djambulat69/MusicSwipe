@@ -7,18 +7,16 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.collections.ArrayList
 
-class MainViewModel : ViewModel() {
+class TracksViewModel : ViewModel() {
 
     private var spotifyWebApiHelper: SpotifyWebApiHelper? = null
 
     private val _tracks = MutableLiveData<List<PlayTrack>>()
+    private val _playback = MutableLiveData<Boolean>(false)
 
     @Volatile
     private var isLoadingRecommendations = false
@@ -44,9 +42,6 @@ class MainViewModel : ViewModel() {
     private var artistSeed = "2RdwBSPQiwcmiDo9kixcl8"
     private var genreSeed = "pop"
 
-    private val _playbackUpdates = MutableSharedFlow<PlayTrack>()
-
-
     var token: String? = null
         set(newToken) {
             field = newToken
@@ -61,8 +56,7 @@ class MainViewModel : ViewModel() {
         }
 
     val tracks: LiveData<List<PlayTrack>> = _tracks
-
-    val playbackUpdates: SharedFlow<PlayTrack> = _playbackUpdates.asSharedFlow()
+    val playback: LiveData<Boolean> = _playback
 
 
     override fun onCleared() {
@@ -100,6 +94,7 @@ class MainViewModel : ViewModel() {
 
     fun prepareNewTrack(url: String, position: Int) {
         isPreparing = true
+        _playback.value = false
         with(mediaPlayer) {
             reset()
             setDataSource(url)
@@ -129,9 +124,7 @@ class MainViewModel : ViewModel() {
         if (isPlaying) mediaPlayer.pause() else mediaPlayer.start()
         playTrack.isPlaying = !isPlaying
 
-        viewModelScope.launch {
-            _playbackUpdates.emit(playTrack)
-        }
+        _playback.value = playTrack.isPlaying
     }
 
     fun onTrackLiked(playTrack: PlayTrack) {
@@ -141,10 +134,9 @@ class MainViewModel : ViewModel() {
         artistSeed = mainArtistId
         viewModelScope.launch {
             try {
-                val newGenreSeed: String? = spotifyWebApiHelper?.getArtist(mainArtistId)?.genres?.firstOrNull()
-                newGenreSeed?.let {
-                    genreSeed = newGenreSeed
-                }
+                val newGenreSeed: String =
+                    spotifyWebApiHelper?.getArtist(mainArtistId)?.genres?.firstOrNull() ?: return@launch
+                genreSeed = newGenreSeed
                 loadRecommendations(5)
             } catch (e: Throwable) {
                 Log.i(TAG, "onTrackLiked: ${e.stackTraceToString()}")
@@ -153,22 +145,18 @@ class MainViewModel : ViewModel() {
     }
 
     private suspend fun loadTopTracksSeeds() {
-        val topTracksResponse = spotifyWebApiHelper?.getTopTracks(3)
-        topTracksResponse?.let {
-            val topTracks = topTracksResponse.items
+        val topTracksResponse = spotifyWebApiHelper?.getTopTracks(3) ?: return
+        val topTracks = topTracksResponse.items
 
-            trackSeeds.clear()
-            trackSeeds.addAll(topTracks.map { it.id })
+        trackSeeds.clear()
+        trackSeeds.addAll(topTracks.map { it.id })
 
-            val topMainArtistId = topTracks.first().artists.first().id
+        val topMainArtistId = topTracks.first().artists.first().id
 
-            artistSeed = topMainArtistId
+        artistSeed = topMainArtistId
 
-            val newGenreSeed: String? = spotifyWebApiHelper?.getArtist(topMainArtistId)?.genres?.firstOrNull()
-            newGenreSeed?.let {
-                genreSeed = newGenreSeed
-            }
-        }
+        val newGenreSeed: String = spotifyWebApiHelper?.getArtist(topMainArtistId)?.genres?.firstOrNull() ?: return
+        genreSeed = newGenreSeed
     }
 
     private fun List<PlayTrack>.copy(): List<PlayTrack> {

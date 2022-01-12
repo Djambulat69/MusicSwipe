@@ -29,7 +29,7 @@ class TracksAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.track_card_item, parent, false)
-        return TrackViewHolder(view, mediaPlayer)
+        return TrackViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: TrackViewHolder, position: Int) {
