@@ -110,6 +110,13 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
                 }
             }
         }
+        viewLifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                viewModel.errorLikeEvents.collect {
+                    snackBar(getString(R.string.failed_like)).show()
+                }
+            }
+        }
 
         val installedSpotify =
             try {
@@ -176,7 +183,7 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
     private fun getLoginLauncher() = registerForActivityResult(SpotifyLoginActivityResultContract()) { response ->
         response?.let {
             when (response.type) {
-                AuthorizationResponse.Type.TOKEN -> viewModel.token = response.accessToken
+                AuthorizationResponse.Type.TOKEN -> viewModel.authorize(response.accessToken)
                 else -> snackBar("Something went wrong. ${response.type.name}").show()
             }
         }

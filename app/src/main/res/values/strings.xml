@@ -5,4 +5,5 @@
     <string name="get_spotify_free">GET SPOTIFY FREE</string>
     <string name="profile">Profile</string>
     <string name="trunked_title">%s…</string>
+    <string name="failed_like">Failed to like this track</string>
 </resources>
