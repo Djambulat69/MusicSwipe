@@ -10,6 +10,7 @@ import com.yuyakaido.android.cardstackview.Direction
 class TracksCardStackListener(
     private val viewModel: TracksViewModel,
     private val cardStack: CardStackView,
+    private inline val onPrepareTrack: () -> Unit,
     private val getSavedInstanceState: () -> Bundle?
 ) : CardStackListener {
     override fun onCardAppeared(view: View?, position: Int) {
@@ -30,6 +31,7 @@ class TracksCardStackListener(
 
         playTrack?.track?.previewUrl?.let {
             viewModel.prepareNewTrack(playTrack.track.previewUrl, position)
+            onPrepareTrack()
         }
     }
 

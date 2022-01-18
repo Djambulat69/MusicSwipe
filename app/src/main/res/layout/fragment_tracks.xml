@@ -18,8 +18,8 @@
         android:id="@+id/spotify_button"
         android:layout_width="wrap_content"
         android:layout_height="60dp"
-        android:textStyle="bold"
         android:textColor="?attr/colorOnSecondary"
+        android:textStyle="bold"
         app:backgroundTint="?attr/colorSecondary"
         app:icon="@drawable/spotify_icon_green"
         app:iconGravity="start"
@@ -83,5 +83,20 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/playback_button"
         app:tint="@null" />
+
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/track_progress_circle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="false"
+        android:max="@integer/trackProgressMax"
+        android:progress="0"
+        app:indicatorSize="95dp"
+        app:layout_constraintBottom_toBottomOf="@id/playback_button"
+        app:layout_constraintEnd_toEndOf="@id/playback_button"
+        app:layout_constraintStart_toStartOf="@id/playback_button"
+        app:layout_constraintTop_toTopOf="@id/playback_button"
+        app:trackThickness="6dp"
+        tools:progress="600" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

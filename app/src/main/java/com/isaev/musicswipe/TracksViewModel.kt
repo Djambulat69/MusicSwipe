@@ -7,6 +7,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.collections.ArrayList
@@ -16,7 +19,9 @@ class TracksViewModel : ViewModel() {
     private var spotifyWebApiHelper: SpotifyWebApiHelper? = null
 
     private val _tracks = MutableLiveData<List<PlayTrack>>()
-    private val _playback = MutableLiveData<Boolean>(false)
+    private val _playbackState = MutableLiveData<PlaybackState>()
+
+    private val _completeEvents: MutableSharedFlow<Unit> = MutableSharedFlow()
 
     @Volatile
     private var isLoadingRecommendations = false
@@ -31,8 +36,8 @@ class TracksViewModel : ViewModel() {
                 .setUsage(AudioAttributes.USAGE_MEDIA)
                 .build()
         )
-        setOnCompletionListener { mediaPlayer: MediaPlayer ->
-            mediaPlayer.start()
+        setOnCompletionListener {
+            viewModelScope.launch { _completeEvents.emit(Unit) }
         }
     }
 
@@ -56,11 +61,26 @@ class TracksViewModel : ViewModel() {
         }
 
     val tracks: LiveData<List<PlayTrack>> = _tracks
-    val playback: LiveData<Boolean> = _playback
+    val playbackState: LiveData<PlaybackState> = _playbackState
 
+    val completeEvents: SharedFlow<Unit> = _completeEvents.asSharedFlow()
+
+    val currentPosition: Int
+        get() = mediaPlayer.currentPosition
+
+    val duration: Int
+        get() = mediaPlayer.duration
 
     override fun onCleared() {
         mediaPlayer.release()
+    }
+
+    fun startPlayer() {
+        mediaPlayer.start()
+    }
+
+    fun pausePlayer() {
+        mediaPlayer.pause()
     }
 
     fun loadRecommendations(limit: Int = 10) {
@@ -73,16 +93,12 @@ class TracksViewModel : ViewModel() {
                     arrayOf(genreSeed),
                     trackSeeds.toTypedArray(),
                     limit
-                )
+                ) ?: return@launch
 
-                recommendationsResponse?.let {
-                    val newTracks =
-                        recommendationsResponse.tracks.filter { it.previewUrl != null }.map { PlayTrack(it) }
+                val newTracks =
+                    recommendationsResponse.tracks.filter { it.previewUrl != null }.map { PlayTrack(it) }
 
-                    _tracks.value = _tracks.value?.plus(newTracks) ?: newTracks
-                    val names = recommendationsResponse.tracks.map { it.name }
-                    Log.i(TAG, names.toString())
-                }
+                _tracks.value = _tracks.value?.plus(newTracks) ?: newTracks
             } catch (e: Exception) {
                 Log.i(TAG, e.stackTraceToString())
             } finally {
@@ -94,37 +110,36 @@ class TracksViewModel : ViewModel() {
 
     fun prepareNewTrack(url: String, position: Int) {
         isPreparing = true
-        _playback.value = false
+        _playbackState.value = PlaybackState(isPlaying = false, false)
         with(mediaPlayer) {
             reset()
             setDataSource(url)
             prepareAsync()
-            setOnPreparedListener {
+            setOnPreparedListener { mp ->
                 isPreparing = false
-                onTrackPlayClicked(position)
+                onTrackPlayClicked(position, true)
             }
         }
     }
 
-    fun onTrackPlayClicked(position: Int) {
+    fun onTrackPlayClicked(position: Int, firstPlay: Boolean = false) {
         if (isPreparing) return
 
         val currentTracks = _tracks.value
 
         if (currentTracks != null) {
-            onTrackPlayClicked(currentTracks[position])
+            onTrackPlayClicked(currentTracks[position], firstPlay)
         }
     }
 
-    fun onTrackPlayClicked(playTrack: PlayTrack) {
+    fun onTrackPlayClicked(playTrack: PlayTrack, firstPlay: Boolean = false) {
         if (isPreparing) return
 
         val isPlaying = playTrack.isPlaying
 
-        if (isPlaying) mediaPlayer.pause() else mediaPlayer.start()
         playTrack.isPlaying = !isPlaying
 
-        _playback.value = playTrack.isPlaying
+        _playbackState.value = PlaybackState(isPlaying, firstPlay)
     }
 
     fun onTrackLiked(playTrack: PlayTrack) {
@@ -164,7 +179,7 @@ class TracksViewModel : ViewModel() {
     }
 
     companion object {
-        private const val TAG = "MainViewModel"
+        private const val TAG = "TracksViewModel"
     }
 
 }

@@ -3,6 +3,8 @@ package com.isaev.musicswipe
 import android.content.Context
 import android.view.animation.AccelerateInterpolator
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.yuyakaido.android.cardstackview.*
@@ -35,3 +37,6 @@ fun CardStackView.swipeRight() {
 
 val RecyclerView.ViewHolder.context: Context
     get() = itemView.context
+
+val Fragment.viewLifecycleScope: LifecycleCoroutineScope
+    get() = viewLifecycleOwner.lifecycleScope

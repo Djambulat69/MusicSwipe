@@ -1,18 +1,23 @@
 package com.isaev.musicswipe
 
+import android.animation.ObjectAnimator
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.view.animation.LinearInterpolator
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.isaev.musicswipe.databinding.FragmentTracksBinding
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
 import com.yuyakaido.android.cardstackview.CardStackLayoutManager
 import com.yuyakaido.android.cardstackview.StackFrom
+import kotlinx.coroutines.launch
 
 class TracksFragment : Fragment(R.layout.fragment_tracks) {
 
@@ -21,11 +26,27 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
 
     private val viewModel: TracksViewModel by viewModels()
 
+    private val progressAnimator: ObjectAnimator by lazy {
+        ObjectAnimator.ofInt(
+            binding.trackProgressCircle, "progress",
+            requireContext().resources.getInteger(R.integer.trackProgressMax)
+        ).apply {
+            setAutoCancel(true)
+            repeatCount = 0
+            interpolator = LinearInterpolator()
+        }
+    }
+
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         _binding = FragmentTracksBinding.bind(view)
 
         binding.cardStack.layoutManager = CardStackLayoutManager(
-            requireContext(), TracksCardStackListener(viewModel, binding.cardStack) { savedInstanceState }
+            requireContext(), TracksCardStackListener(
+                viewModel,
+                binding.cardStack,
+                onPrepareTrack = { binding.trackProgressCircle.isIndeterminate = true }
+            ) { savedInstanceState }
         ).apply {
             setStackFrom(StackFrom.Top)
             setTranslationInterval(8f)
@@ -43,7 +64,6 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
                 TracksAdapter(TracksDiffCallback(), cardStack.layoutManager as CardStackLayoutManager) { position ->
                     viewModel.onTrackPlayClicked(position)
                 }
-
             likeButton.setOnClickListener {
                 cardStack.swipeRight()
             }
@@ -61,10 +81,34 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
             (binding.cardStack.adapter as TracksAdapter).tracks = tracks
         }
 
-        viewModel.playback.observe(viewLifecycleOwner) { isPlaying ->
-            binding.playbackButton.setImageResource(
-                if (isPlaying) R.drawable.ic_baseline_pause else R.drawable.ic_baseline_play_arrow
-            )
+        viewModel.playbackState.observe(viewLifecycleOwner) { playbackState ->
+            if (playbackState.isPlaying) {
+                progressAnimator.pause()
+                viewModel.pausePlayer()
+                binding.playbackButton.setImageResource(R.drawable.ic_baseline_play_arrow)
+            } else {
+                binding.playbackButton.setImageResource(R.drawable.ic_baseline_pause)
+
+                viewModel.startPlayer()
+                if (playbackState.firstPlay) {
+                    beginProgressAnimationFromStart()
+                } else {
+                    if (progressAnimator.isPaused) {
+                        progressAnimator.resume()
+                    } else {
+                        progressAnimator.start()
+                    }
+                }
+            }
+        }
+
+        viewLifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                viewModel.completeEvents.collect {
+                    viewModel.startPlayer()
+                    beginProgressAnimationFromStart()
+                }
+            }
         }
 
         val installedSpotify =
@@ -110,6 +154,7 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        progressAnimator.cancel()
         _binding = null
     }
 
@@ -120,6 +165,7 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
     private fun restoreViewState(savedInstanceState: Bundle) {
         val savedTopPosition: Int = savedInstanceState.getInt(CARD_STACK_STATE_KEY)
         (binding.cardStack.layoutManager as CardStackLayoutManager).topPosition = savedTopPosition
+        progressAnimator.duration = (viewModel.duration - viewModel.currentPosition).toLong()
     }
 
     private fun authorize() {
@@ -174,6 +220,13 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
             )
         }
         startActivity(intent)
+    }
+
+    private fun beginProgressAnimationFromStart() {
+        binding.trackProgressCircle.setProgressCompat(0, true)
+        progressAnimator.setIntValues(0, requireContext().resources.getInteger(R.integer.trackProgressMax))
+        progressAnimator.duration = viewModel.duration.toLong()
+        progressAnimator.start()
     }
 
     companion object {
