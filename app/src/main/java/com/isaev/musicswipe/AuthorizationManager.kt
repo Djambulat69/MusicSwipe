@@ -24,9 +24,9 @@ object AuthorizationManager {
         }.build()
     }
 
-    suspend fun setToken(newToken: String) {
-        _toketState.emit(newToken)
-        _authState.emit(true)
+    fun setToken(newToken: String) {
+        _toketState.value = newToken
+        _authState.value = true
     }
 
     private const val CLIENT_ID = "ff565d0979aa4da5810b5f3d55057c8f"

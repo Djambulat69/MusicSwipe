@@ -10,8 +10,6 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.*
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
 class TracksViewModel : ViewModel() {
 
@@ -150,9 +148,6 @@ class TracksViewModel : ViewModel() {
         artistSeed = mainArtistId
         viewModelScope.launch {
             try {
-                suspendCoroutine<Unit> {
-                    it.resumeWithException(Exception("Testing"))
-                }
                 val newGenreSeed: String =
                     spotifyWebApiHelper.getArtist(mainArtistId).genres.firstOrNull() ?: return@launch
                 genreSeed = newGenreSeed
@@ -165,9 +160,7 @@ class TracksViewModel : ViewModel() {
     }
 
     fun authorize(newToken: String) {
-        viewModelScope.launch {
-            AuthorizationManager.setToken(newToken)
-        }
+        AuthorizationManager.setToken(newToken)
     }
 
     private suspend fun loadTopTracksSeeds() {

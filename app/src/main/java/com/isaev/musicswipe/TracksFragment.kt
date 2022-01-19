@@ -37,6 +37,8 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
         }
     }
 
+    private val loginLauncher = getLoginLauncher()
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         _binding = FragmentTracksBinding.bind(view)
@@ -177,7 +179,7 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
 
     private fun authorize() {
         val request: AuthorizationRequest = AuthorizationManager.request()
-        getLoginLauncher().launch(request)
+        loginLauncher.launch(request)
     }
 
     private fun getLoginLauncher() = registerForActivityResult(SpotifyLoginActivityResultContract()) { response ->
