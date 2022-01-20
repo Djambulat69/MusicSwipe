@@ -106,7 +106,6 @@ class TracksViewModel : ViewModel() {
         }
     }
 
-
     fun prepareNewTrack(url: String, position: Int) {
         isPreparing = true
         _playbackState.value = PlaybackState(isPlaying = false, false)
@@ -135,9 +134,7 @@ class TracksViewModel : ViewModel() {
         if (isPreparing) return
 
         val isPlaying = playTrack.isPlaying
-
         playTrack.isPlaying = !isPlaying
-
         _playbackState.value = PlaybackState(isPlaying, firstPlay)
     }
 

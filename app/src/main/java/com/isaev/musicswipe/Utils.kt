@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.yuyakaido.android.cardstackview.*
 
-fun Fragment.snackBar(text: CharSequence, duration: Int = Snackbar.LENGTH_SHORT): Snackbar {
+fun Fragment.makeSnackBar(text: CharSequence, duration: Int = Snackbar.LENGTH_SHORT): Snackbar {
     return Snackbar.make(requireView(), text, duration)
 }
 

@@ -13,8 +13,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.isaev.musicswipe.databinding.FragmentTracksBinding
-import com.spotify.sdk.android.auth.AuthorizationRequest
-import com.spotify.sdk.android.auth.AuthorizationResponse
 import com.yuyakaido.android.cardstackview.CardStackLayoutManager
 import com.yuyakaido.android.cardstackview.StackFrom
 import kotlinx.coroutines.launch
@@ -36,9 +34,6 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
             interpolator = LinearInterpolator()
         }
     }
-
-    private val loginLauncher = getLoginLauncher()
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         _binding = FragmentTracksBinding.bind(view)
@@ -115,7 +110,7 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
         viewLifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 viewModel.errorLikeEvents.collect {
-                    snackBar(getString(R.string.failed_like)).show()
+                    makeSnackBar(getString(R.string.failed_like)).show()
                 }
             }
         }
@@ -178,17 +173,9 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
     }
 
     private fun authorize() {
-        val request: AuthorizationRequest = AuthorizationManager.request()
-        loginLauncher.launch(request)
-    }
-
-    private fun getLoginLauncher() = registerForActivityResult(SpotifyLoginActivityResultContract()) { response ->
-        response?.let {
-            when (response.type) {
-                AuthorizationResponse.Type.TOKEN -> viewModel.authorize(response.accessToken)
-                else -> snackBar("Something went wrong. ${response.type.name}").show()
-            }
-        }
+        WebViewActivity.startFrom(requireContext())
+        /*val request: AuthorizationRequest = AuthorizationManager.request()
+        loginLauncher.launch(request)*/
     }
 
     private fun getCurrentPlayTrack(): PlayTrack? {
