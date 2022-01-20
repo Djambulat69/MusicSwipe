@@ -117,7 +117,7 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
 
         val installedSpotify =
             try {
-                requireContext().packageManager.getPackageInfo("com.spotify.music", 0)
+                requireContext().packageManager.getPackageInfo(SPOTIFY_APP_PACKAGE_NAME, 0)
                 true
             } catch (e: PackageManager.NameNotFoundException) {
                 false
@@ -174,8 +174,6 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
 
     private fun authorize() {
         WebViewActivity.startFrom(requireContext())
-        /*val request: AuthorizationRequest = AuthorizationManager.request()
-        loginLauncher.launch(request)*/
     }
 
     private fun getCurrentPlayTrack(): PlayTrack? {
@@ -186,7 +184,7 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
     }
 
     private fun openSpotifyInGooglePlayStore() {
-        val appPackageName = "com.spotify.music"
+        val appPackageName = SPOTIFY_APP_PACKAGE_NAME
         val referrer =
             "adjust_campaign=${requireContext().packageName}&adjust_tracker=ndjczk&utm_source=adjust_preinstall"
 
@@ -228,6 +226,7 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
     companion object {
         const val TAG = "TracksFragment"
 
+        const val SPOTIFY_APP_PACKAGE_NAME = "com.spotify.music"
         const val CARD_STACK_STATE_KEY = "card_stack_state_key"
     }
 }

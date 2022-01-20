@@ -3,9 +3,9 @@ package com.isaev.musicswipe
 import android.net.Uri
 import android.util.Log
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -13,8 +13,9 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.scalars.ScalarsConverterFactory
-import retrofit2.http.*
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
+import retrofit2.http.POST
 
 
 object AuthorizationManager {
@@ -39,26 +40,22 @@ object AuthorizationManager {
                 )
                 .build()
         )
-        .addConverterFactory(ScalarsConverterFactory.create())
         .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
         .build()
 
     private val authService = retrofit.create(SpotifyAuthService::class.java)
 
     private val _toketState: MutableStateFlow<String?> = MutableStateFlow(null)
-    private val _authState: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     val token: String get() = _toketState.value!!
     var refreshToken: String? = null
-    val authState: StateFlow<Boolean> = _authState.asStateFlow()
+    val authState: Flow<Boolean> = _toketState.map { it != null }
 
     fun isAuthorized(): Boolean = _toketState.value != null
 
     fun setToken(newToken: String) {
         _toketState.value = newToken
-        _authState.value = true
     }
-
 
     // AuthService methods
 
@@ -99,17 +96,6 @@ object AuthorizationManager {
 }
 
 interface SpotifyAuthService {
-
-    @GET("authorize")
-    suspend fun authorize(
-        @Query("client_id") clientId: String,
-        @Query("response_type") responseType: String,
-        @Query("redirect_uri") redirectUri: String,
-        @Query("state") state: String,
-        @Query("scope") scope: String,
-        @Query("code_challenge_method") codeChallengeMethod: String,
-        @Query("code_challenge") codeChallenge: String
-    ): String
 
     @FormUrlEncoded
     @POST("api/token")
