@@ -1,7 +1,10 @@
 package com.isaev.musicswipe
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.net.Uri
 import android.util.Log
+import androidx.core.content.edit
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +24,9 @@ import retrofit2.http.POST
 object AuthorizationManager {
 
     private const val TAG = "AuthorizationManager"
+
+    private const val TOKEN_KEY = "token_key"
+    private const val REFRESH_TOKEN_KEY = "refresh_token_key"
 
     private const val CLIENT_ID = "ff565d0979aa4da5810b5f3d55057c8f"
     private const val REDIRECT_URI = "http://music.swipe.com"
@@ -50,6 +56,15 @@ object AuthorizationManager {
     val token: String get() = _toketState.value!!
     var refreshToken: String? = null
     val authState: Flow<Boolean> = _toketState.map { it != null }
+
+    suspend fun refreshTokens() {
+        val prefs = getPrefs()
+        val savedToken = prefs.getString(TOKEN_KEY, null) ?: return
+        val savedRefreshToken = prefs.getString(REFRESH_TOKEN_KEY, null) ?: return
+        _toketState.value = savedToken
+        refreshToken = savedRefreshToken
+        refreshToken()
+    }
 
     fun isAuthorized(): Boolean = _toketState.value != null
 
@@ -81,18 +96,33 @@ object AuthorizationManager {
         val response = requestToken(authCode)
         setToken(response.accessToken)
         refreshToken = response.refreshToken
+
+        getPrefs().edit {
+            putString(TOKEN_KEY, response.accessToken)
+            putString(REFRESH_TOKEN_KEY, response.refreshToken)
+        }
     }
 
-    suspend fun refreshToken(refreshToken: String) {
-        val response = authService.refreshToken("refresh_token", refreshToken, CLIENT_ID)
-        setToken(response.accessToken)
-        this.refreshToken = refreshToken
+    private suspend fun refreshToken() {
+        refreshToken?.let {
+            val response = authService.refreshToken("refresh_token", it, CLIENT_ID)
+            setToken(response.accessToken)
+            this.refreshToken = response.refreshToken
+            getPrefs().edit {
+                putString(TOKEN_KEY, response.accessToken)
+                putString(REFRESH_TOKEN_KEY, response.refreshToken)
+            }
+        }
     }
 
     private suspend fun requestToken(code: String) =
         authService.requestToken(
             "authorization_code", code, REDIRECT_URI, CLIENT_ID, CODE_VERIFIER
         )
+
+    private fun getPrefs(): SharedPreferences {
+        return MusicSwipeApp.instance.getSharedPreferences("auth", Context.MODE_PRIVATE)
+    }
 }
 
 interface SpotifyAuthService {

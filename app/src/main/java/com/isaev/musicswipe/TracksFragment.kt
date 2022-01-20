@@ -50,9 +50,7 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
             setMaxDegree(60f)
         }
 
-        if (savedInstanceState == null) {
-            authorize()
-        } else {
+        if (savedInstanceState != null) {
             restoreViewState(savedInstanceState)
         }
 
