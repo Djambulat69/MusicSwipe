@@ -156,10 +156,6 @@ class TracksViewModel : ViewModel() {
         }
     }
 
-    fun authorize(newToken: String) {
-        AuthorizationManager.setToken(newToken)
-    }
-
     private suspend fun loadTopTracksSeeds() {
         val topTracksResponse = spotifyWebApiHelper.getTopTracks(3)
         val topTracks = topTracksResponse.items

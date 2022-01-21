@@ -40,3 +40,6 @@ val RecyclerView.ViewHolder.context: Context
 
 val Fragment.viewLifecycleScope: LifecycleCoroutineScope
     get() = viewLifecycleOwner.lifecycleScope
+
+val Fragment.fragmentInteractor: FragmentInteractor?
+    get() = activity as? FragmentInteractor

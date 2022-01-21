@@ -170,10 +170,6 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
         progressAnimator.duration = (viewModel.duration - viewModel.currentPosition).toLong()
     }
 
-    private fun authorize() {
-        WebViewActivity.startFrom(requireContext())
-    }
-
     private fun getCurrentPlayTrack(): PlayTrack? {
         val position = (binding.cardStack.layoutManager as CardStackLayoutManager?)?.topPosition
         return position?.let {
@@ -222,6 +218,8 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
     }
 
     companion object {
+        fun newInstance() = TracksFragment()
+
         const val TAG = "TracksFragment"
 
         const val SPOTIFY_APP_PACKAGE_NAME = "com.spotify.music"

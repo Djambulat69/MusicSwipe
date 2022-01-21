@@ -2,11 +2,13 @@ package com.isaev.musicswipe
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
+import androidx.lifecycle.lifecycleScope
 import com.isaev.musicswipe.databinding.ActivityMainBinding
 import kotlinx.coroutines.launch
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), FragmentInteractor {
 
     private lateinit var binding: ActivityMainBinding
 
@@ -17,21 +19,49 @@ class MainActivity : AppCompatActivity() {
 
         if (savedInstanceState == null) {
 
-            MusicSwipeApp.instance.applicationScope.launch {
-                AuthorizationManager.refreshTokens()
-                if (!AuthorizationManager.isAuthorized()) {
-                    authorize()
+            lifecycleScope.launch {
+                AuthorizationManager.initTokens()
+                if (AuthorizationManager.isAuthorized()) {
+                    supportFragmentManager.commit {
+                        add(R.id.fragment_container, TracksFragment.newInstance(), null)
+                    }
+                } else {
+                    supportFragmentManager.commit {
+                        add(R.id.fragment_container, LoginFragment.newInstance(), null)
+                    }
                 }
-            }
-
-            supportFragmentManager.commit {
-                add(R.id.fragment_container, TracksFragment())
             }
         }
     }
 
-    private fun authorize() {
-        WebViewActivity.startFrom(this)
+    override fun onBackPressed() {
+        if (supportFragmentManager.backStackEntryCount > 0) {
+            supportFragmentManager.popBackStack()
+        } else {
+            super.onBackPressed()
+        }
+    }
+
+    override fun back() {
+        supportFragmentManager.popBackStack()
+    }
+
+    override fun openLogin() {
+        replaceFragment(LoginFragment.newInstance())
+    }
+
+    override fun openLoginWebView() {
+        replaceFragment(WebViewFragment.newInstance())
+    }
+
+    override fun openTracks() {
+        replaceFragment(TracksFragment.newInstance())
+    }
+
+    private fun replaceFragment(fragment: Fragment) {
+        supportFragmentManager.commit {
+            replace(R.id.fragment_container, fragment)
+        }
     }
 
     private companion object {

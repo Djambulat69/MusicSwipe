@@ -16,6 +16,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import retrofit2.create
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
@@ -25,16 +26,15 @@ object AuthorizationManager {
 
     private const val TAG = "AuthorizationManager"
 
+    private const val BASE_URL = "https://accounts.spotify.com/"
     private const val TOKEN_KEY = "token_key"
     private const val REFRESH_TOKEN_KEY = "refresh_token_key"
 
     private const val CLIENT_ID = "ff565d0979aa4da5810b5f3d55057c8f"
     private const val REDIRECT_URI = "http://music.swipe.com"
 
-    private lateinit var CODE_VERIFIER: String
-    private val CODE_CHALLENGE: String by lazy { Pkce.generateCodeChallenge(CODE_VERIFIER) }
-
-    private const val BASE_URL = "https://accounts.spotify.com/"
+    private lateinit var codeVerifier: String
+    private val codeChallenge: String by lazy { Pkce.generateCodeChallenge(codeVerifier) }
 
     private val retrofit: Retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL)
@@ -49,33 +49,30 @@ object AuthorizationManager {
         .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
         .build()
 
-    private val authService = retrofit.create(SpotifyAuthService::class.java)
+    private val authService = retrofit.create<SpotifyAuthService>()
 
-    private val _toketState: MutableStateFlow<String?> = MutableStateFlow(null)
+    private val _token: MutableStateFlow<String?> = MutableStateFlow(null)
+    private var refreshToken: String? = null
 
-    val token: String get() = _toketState.value!!
-    var refreshToken: String? = null
-    val authState: Flow<Boolean> = _toketState.map { it != null }
+    val token: String get() = _token.value!!
+    val authState: Flow<Boolean> = _token.map { it != null }
 
-    suspend fun refreshTokens() {
+    suspend fun initTokens() {
         val prefs = getPrefs()
         val savedToken = prefs.getString(TOKEN_KEY, null) ?: return
         val savedRefreshToken = prefs.getString(REFRESH_TOKEN_KEY, null) ?: return
-        _toketState.value = savedToken
+        _token.value = savedToken
         refreshToken = savedRefreshToken
-        refreshToken()
+        refreshTokens()
     }
 
-    fun isAuthorized(): Boolean = _toketState.value != null
+    fun isAuthorized(): Boolean = _token.value != null
 
-    fun setToken(newToken: String) {
-        _toketState.value = newToken
-    }
-
-    // AuthService methods
-
+    // --- Auth ---
     suspend fun authorizeUrl(): String {
-        CODE_VERIFIER = Pkce.generateCodeVerifier()
+        if (!::codeVerifier.isInitialized) {
+            codeVerifier = Pkce.generateCodeVerifier()
+        }
 
         return Uri.parse("https://accounts.spotify.com/")
             .buildUpon()
@@ -87,14 +84,14 @@ object AuthorizationManager {
             .appendQueryParameter("state", "auth")
             .appendQueryParameter("scope", "user-top-read")
             .appendQueryParameter("code_challenge_method", "S256")
-            .appendQueryParameter("code_challenge", CODE_CHALLENGE)
+            .appendQueryParameter("code_challenge", codeChallenge)
             .build()
             .toString()
     }
 
     suspend fun authorize(authCode: String) {
         val response = requestToken(authCode)
-        setToken(response.accessToken)
+        _token.value = response.accessToken
         refreshToken = response.refreshToken
 
         getPrefs().edit {
@@ -103,10 +100,10 @@ object AuthorizationManager {
         }
     }
 
-    private suspend fun refreshToken() {
+    private suspend fun refreshTokens() {
         refreshToken?.let {
             val response = authService.refreshToken("refresh_token", it, CLIENT_ID)
-            setToken(response.accessToken)
+            _token.value = response.accessToken
             this.refreshToken = response.refreshToken
             getPrefs().edit {
                 putString(TOKEN_KEY, response.accessToken)
@@ -117,7 +114,7 @@ object AuthorizationManager {
 
     private suspend fun requestToken(code: String) =
         authService.requestToken(
-            "authorization_code", code, REDIRECT_URI, CLIENT_ID, CODE_VERIFIER
+            "authorization_code", code, REDIRECT_URI, CLIENT_ID, codeVerifier
         )
 
     private fun getPrefs(): SharedPreferences {
@@ -145,12 +142,6 @@ interface SpotifyAuthService {
         @Field("client_id") clientId: String
     ): AuthTokenResponse
 }
-
-@Serializable
-data class AuthorizeResponse(
-    @SerialName("code") val code: String,
-    @SerialName("state") val state: String
-)
 
 @Serializable
 data class AuthTokenResponse(

@@ -1,24 +1,24 @@
 package com.isaev.musicswipe
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.isaev.musicswipe.databinding.ActivityWebViewBinding
+import com.isaev.musicswipe.databinding.FragmentWebViewBinding
 import kotlinx.coroutines.launch
 
-class WebViewActivity : AppCompatActivity() {
+class WebViewFragment : Fragment(R.layout.fragment_web_view) {
 
-    private val binding: ActivityWebViewBinding by lazy { ActivityWebViewBinding.inflate(layoutInflater) }
+    private var _binding: FragmentWebViewBinding? = null
+    private val binding: FragmentWebViewBinding get() = _binding!!
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(binding.root)
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        _binding = FragmentWebViewBinding.bind(view)
 
         with(binding.webView) {
             settings.javaScriptEnabled = true
@@ -34,11 +34,11 @@ class WebViewActivity : AppCompatActivity() {
                                 } catch (e: Exception) {
                                     Log.i(TAG, e.stackTraceToString())
                                 } finally {
-                                    finish()
+                                    openTracks()
                                 }
                             }
                         } else {
-                            finish()
+                            openLogin()
                         }
                         true
                     } else {
@@ -46,22 +46,25 @@ class WebViewActivity : AppCompatActivity() {
                     }
                 }
             }
-            lifecycleScope.launch {
+            viewLifecycleScope.launch {
                 val url = AuthorizationManager.authorizeUrl()
                 loadUrl(url)
             }
         }
     }
 
-    companion object {
-        const val TAG = "WebViewActivity"
+    private fun openTracks() {
+        fragmentInteractor?.openTracks()
+    }
 
-        fun startFrom(context: Context) {
-            val intent = Intent().apply {
-                setClass(context, WebViewActivity::class.java)
-            }
-            context.startActivity(intent)
-        }
+    fun openLogin() {
+        fragmentInteractor?.openLogin()
+    }
+
+    companion object {
+        private const val TAG = "WebViewFragment"
+
+        fun newInstance() = WebViewFragment()
     }
 
 }
