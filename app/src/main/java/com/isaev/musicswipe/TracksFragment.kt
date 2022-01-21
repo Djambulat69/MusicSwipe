@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -12,6 +13,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.isaev.musicswipe.databinding.FragmentTracksBinding
 import com.yuyakaido.android.cardstackview.CardStackLayoutManager
 import com.yuyakaido.android.cardstackview.StackFrom
@@ -95,6 +99,21 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
                     }
                 }
             }
+        }
+
+        viewModel.user.observe(viewLifecycleOwner) { user ->
+            Glide.with(this)
+                .load(user.images.lastOrNull()?.url)
+                .circleCrop()
+                .into(
+                    object : CustomTarget<Drawable>() {
+                        override fun onLoadCleared(placeholder: Drawable?) {}
+
+                        override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
+                            binding.tracksToolbar.menu.findItem(R.id.profile_menu_item).icon = resource
+                        }
+                    }
+                )
         }
 
         viewLifecycleScope.launch {

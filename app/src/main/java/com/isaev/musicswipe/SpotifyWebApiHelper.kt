@@ -7,6 +7,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import retrofit2.create
 
 
 object SpotifyWebApiHelper {
@@ -36,7 +37,7 @@ object SpotifyWebApiHelper {
         .addConverterFactory(json.asConverterFactory(("application/json").toMediaType()))
         .build()
 
-    private val spotifyWebApiService = retrofit.create(SpotifyWebApi::class.java)
+    private val spotifyWebApiService = retrofit.create<SpotifyWebApi>()
 
     suspend fun getRecommendations(
         seedArtists: Array<String>,
@@ -54,4 +55,6 @@ object SpotifyWebApiHelper {
     suspend fun getArtist(id: String): ArtistResponse = spotifyWebApiService.getArtist(id)
 
     suspend fun getTopTracks(limit: Int): TopTracksResponse = spotifyWebApiService.getTopTracks(limit)
+
+    suspend fun getMe(): User = spotifyWebApiService.getMe()
 }

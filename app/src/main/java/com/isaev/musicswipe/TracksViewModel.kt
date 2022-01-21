@@ -16,6 +16,7 @@ class TracksViewModel : ViewModel() {
     private val spotifyWebApiHelper: SpotifyWebApiHelper = SpotifyWebApiHelper
 
     private val _tracks = MutableLiveData<List<PlayTrack>>()
+    private val _user = MutableLiveData<User>()
     private val _playbackState = MutableLiveData<PlaybackState>()
 
     private val _completeEvents: MutableSharedFlow<Unit> = MutableSharedFlow()
@@ -44,6 +45,7 @@ class TracksViewModel : ViewModel() {
     private var genreSeed = ""
 
     val tracks: LiveData<List<PlayTrack>> = _tracks
+    val user: LiveData<User> = _user
     val playbackState: LiveData<PlaybackState> = _playbackState
 
     val completeEvents: SharedFlow<Unit> = _completeEvents.asSharedFlow()
@@ -60,8 +62,17 @@ class TracksViewModel : ViewModel() {
             .onEach { isAuthorized ->
                 if (isAuthorized) {
                     viewModelScope.launch {
-                        loadTopTracksSeeds()
-                        loadRecommendations()
+                        try {
+                            launch {
+                                loadTopTracksSeeds()
+                                loadRecommendations()
+                            }
+                            launch {
+                                loadMyUser()
+                            }
+                        } catch (e: Exception) {
+                            Log.i(TAG, e.stackTraceToString())
+                        }
                     }
                 }
             }
@@ -169,6 +180,11 @@ class TracksViewModel : ViewModel() {
 
         val newGenreSeed: String = spotifyWebApiHelper.getArtist(topMainArtistId).genres.firstOrNull() ?: return
         genreSeed = newGenreSeed
+    }
+
+    private suspend fun loadMyUser() {
+        val user = spotifyWebApiHelper.getMe()
+        _user.value = user
     }
 
     companion object {

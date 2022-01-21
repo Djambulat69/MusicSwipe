@@ -1,6 +1,7 @@
 package com.isaev.musicswipe
 
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
@@ -20,7 +21,11 @@ class MainActivity : AppCompatActivity(), FragmentInteractor {
         if (savedInstanceState == null) {
 
             lifecycleScope.launch {
-                AuthorizationManager.initTokens()
+                try {
+                    AuthorizationManager.initTokens()
+                } catch (e: Exception) {
+                    Log.i(TAG, e.stackTraceToString())
+                }
                 if (AuthorizationManager.isAuthorized()) {
                     supportFragmentManager.commit {
                         add(R.id.fragment_container, TracksFragment.newInstance(), null)

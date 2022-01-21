@@ -23,4 +23,7 @@ interface SpotifyWebApi {
     suspend fun getTopTracks(
         @Query("limit") limit: Int
     ): TopTracksResponse
+
+    @GET("me")
+    suspend fun getMe(): User
 }

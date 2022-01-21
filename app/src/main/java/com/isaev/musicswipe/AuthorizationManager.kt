@@ -82,7 +82,7 @@ object AuthorizationManager {
             .appendQueryParameter("response_type", "code")
             .appendQueryParameter("redirect_uri", "http://music.swipe.com")
             .appendQueryParameter("state", "auth")
-            .appendQueryParameter("scope", "user-top-read")
+            .appendQueryParameter("scope", "user-top-read user-read-private")
             .appendQueryParameter("code_challenge_method", "S256")
             .appendQueryParameter("code_challenge", codeChallenge)
             .build()

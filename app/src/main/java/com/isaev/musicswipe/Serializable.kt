@@ -85,9 +85,9 @@ data class ExternalUrlsX(
 
 @Serializable
 data class Image(
-    @SerialName("height") val height: Int,
+    @SerialName("height") val height: Int?,
     @SerialName("url") val url: String,
-    @SerialName("width") val width: Int
+    @SerialName("width") val width: Int?
 )
 
 @Serializable
@@ -133,4 +133,28 @@ data class TopTracksResponse(
     @SerialName("href") val href: String,
     @SerialName("previous") val previous: String?,
     @SerialName("next") val next: String?
+)
+
+// User
+
+@Serializable
+data class User(
+    @SerialName("country") val country: String,
+    @SerialName("display_name") val displayName: String,
+    @SerialName("email") val email: String? = null,
+    @SerialName("explicit_content") val explicitContent: ExplicitContent,
+    @SerialName("external_urls") val externalUrls: ExternalUrls,
+    @SerialName("followers") val followers: Followers,
+    @SerialName("href") val href: String,
+    @SerialName("id") val id: String,
+    @SerialName("images") val images: List<Image>,
+    @SerialName("product") val product: String,
+    @SerialName("type") val type: String,
+    @SerialName("uri") val uri: String
+)
+
+@Serializable
+data class ExplicitContent(
+    @SerialName("filter_enabled") val filterEnabled: Boolean,
+    @SerialName("filter_locked") val filterLocked: Boolean
 )
