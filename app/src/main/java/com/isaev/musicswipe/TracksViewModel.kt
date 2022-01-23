@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.*
@@ -60,22 +61,19 @@ class TracksViewModel : ViewModel() {
     init {
         AuthorizationManager.authState
             .onEach { isAuthorized ->
-                if (isAuthorized) {
-                    viewModelScope.launch {
-                        try {
-                            launch {
-                                loadTopTracksSeeds()
-                                loadRecommendations()
-                            }
-                            launch {
-                                loadMyUser()
-                            }
-                        } catch (e: Exception) {
-                            Log.i(TAG, e.stackTraceToString())
+                coroutineScope {
+                    if (isAuthorized) {
+                        launch {
+                            loadTopTracksSeeds()
+                            loadRecommendations()
+                        }
+                        launch {
+                            loadMyUser()
                         }
                     }
                 }
             }
+            .catch { e -> Log.i(TAG, e.stackTraceToString()) }
             .launchIn(viewModelScope)
     }
 

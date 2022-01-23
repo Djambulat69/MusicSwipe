@@ -58,12 +58,12 @@ object AuthorizationManager {
     val authState: Flow<Boolean> = _token.map { it != null }
 
     suspend fun initTokens() {
+        refreshTokens()
         val prefs = getPrefs()
         val savedToken = prefs.getString(TOKEN_KEY, null) ?: return
         val savedRefreshToken = prefs.getString(REFRESH_TOKEN_KEY, null) ?: return
         _token.value = savedToken
         refreshToken = savedRefreshToken
-        refreshTokens()
     }
 
     fun isAuthorized(): Boolean = _token.value != null
@@ -103,8 +103,10 @@ object AuthorizationManager {
     private suspend fun refreshTokens() {
         refreshToken?.let {
             val response = authService.refreshToken("refresh_token", it, CLIENT_ID)
+
             _token.value = response.accessToken
-            this.refreshToken = response.refreshToken
+            refreshToken = response.refreshToken
+
             getPrefs().edit {
                 putString(TOKEN_KEY, response.accessToken)
                 putString(REFRESH_TOKEN_KEY, response.refreshToken)
