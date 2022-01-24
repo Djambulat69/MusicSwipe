@@ -103,6 +103,7 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
 
         viewModel.user.observe(viewLifecycleOwner) { user ->
             Glide.with(this)
+                .asDrawable()
                 .load(user.images.lastOrNull()?.url)
                 .circleCrop()
                 .into(
