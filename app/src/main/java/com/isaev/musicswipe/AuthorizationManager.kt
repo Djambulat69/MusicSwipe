@@ -57,27 +57,20 @@ object AuthorizationManager {
     val token: String get() = _token.value!!
     val authState: Flow<Boolean> = _token.map { it != null }
 
-    suspend fun initTokens() {
-        val prefs = getPrefs()
-        val savedRefreshToken = prefs.getString(REFRESH_TOKEN_KEY, null) ?: return
-        refreshTokens(savedRefreshToken)
-    }
-
     fun isAuthorized(): Boolean = _token.value != null
 
-    // --- Auth ---
     suspend fun authorizeUrl(): String {
         if (!::codeVerifier.isInitialized) {
             codeVerifier = Pkce.generateCodeVerifier()
         }
 
-        return Uri.parse("https://accounts.spotify.com/")
+        return Uri.parse(BASE_URL)
             .buildUpon()
             .appendPath("authorize")
             .appendQueryParameter("show_dialog", "true")
-            .appendQueryParameter("client_id", "ff565d0979aa4da5810b5f3d55057c8f")
+            .appendQueryParameter("client_id", CLIENT_ID)
             .appendQueryParameter("response_type", "code")
-            .appendQueryParameter("redirect_uri", "http://music.swipe.com")
+            .appendQueryParameter("redirect_uri", REDIRECT_URI)
             .appendQueryParameter("state", "auth")
             .appendQueryParameter("scope", "user-top-read user-read-private")
             .appendQueryParameter("code_challenge_method", "S256")
@@ -97,8 +90,11 @@ object AuthorizationManager {
         }
     }
 
-    private suspend fun refreshTokens(refreshToken: String) {
-        val response = authService.refreshToken("refresh_token", refreshToken, CLIENT_ID)
+    suspend fun refreshTokens() {
+        val prefs = getPrefs()
+        val savedRefreshToken = prefs.getString(REFRESH_TOKEN_KEY, null) ?: return
+
+        val response = authService.refreshToken("refresh_token", savedRefreshToken, CLIENT_ID)
 
         _token.value = response.accessToken
 

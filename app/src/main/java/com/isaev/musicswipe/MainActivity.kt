@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity(), FragmentInteractor {
 
             lifecycleScope.launch {
                 try {
-                    AuthorizationManager.initTokens()
+                    AuthorizationManager.refreshTokens()
                 } catch (e: Exception) {
                     Log.i(TAG, e.stackTraceToString())
                 }
