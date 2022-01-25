@@ -57,7 +57,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/playback_button"
         app:layout_constraintStart_toStartOf="parent"
-        app:tint="@null" />
+        app:tint="@null"
+        tools:ignore="SpeakableTextPresentCheck" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/playback_button"

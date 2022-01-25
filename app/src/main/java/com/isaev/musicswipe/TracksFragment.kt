@@ -2,6 +2,7 @@ package com.isaev.musicswipe
 
 import android.animation.ObjectAnimator
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
@@ -10,7 +11,6 @@ import android.os.Bundle
 import android.view.View
 import android.view.animation.LinearInterpolator
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.bumptech.glide.Glide
@@ -20,13 +20,18 @@ import com.isaev.musicswipe.databinding.FragmentTracksBinding
 import com.yuyakaido.android.cardstackview.CardStackLayoutManager
 import com.yuyakaido.android.cardstackview.StackFrom
 import kotlinx.coroutines.launch
+import javax.inject.Inject
+import javax.inject.Provider
 
 class TracksFragment : Fragment(R.layout.fragment_tracks) {
 
     private var _binding: FragmentTracksBinding? = null
     private val binding: FragmentTracksBinding get() = _binding!!
 
-    private val viewModel: TracksViewModel by viewModels()
+    @Inject
+    lateinit var viewModelProvider: Provider<TracksViewModel>
+
+    private val viewModel: TracksViewModel by viewModelsFactory { viewModelProvider.get() }
 
     private val progressAnimator: ObjectAnimator by lazy {
         ObjectAnimator.ofInt(
@@ -37,6 +42,12 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
             repeatCount = 0
             interpolator = LinearInterpolator()
         }
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        MusicSwipeApp.instance.daggerComponent.inject(this)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

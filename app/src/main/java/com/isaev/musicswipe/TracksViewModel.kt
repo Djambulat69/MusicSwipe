@@ -11,10 +11,12 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.*
+import javax.inject.Inject
 
-class TracksViewModel : ViewModel() {
-
-    private val spotifyWebApiHelper: SpotifyWebApiHelper = SpotifyWebApiHelper
+class TracksViewModel @Inject constructor(
+    private val spotifyRepository: SpotifyRepository,
+    private val authorizationManager: AuthorizationManager
+) : ViewModel() {
 
     private val _tracks = MutableLiveData<List<PlayTrack>>()
     private val _user = MutableLiveData<User>()
@@ -59,7 +61,7 @@ class TracksViewModel : ViewModel() {
         get() = mediaPlayer.duration
 
     init {
-        AuthorizationManager.authState
+        authorizationManager.authState
             .onEach { isAuthorized ->
                 coroutineScope {
                     if (isAuthorized) {
@@ -96,7 +98,7 @@ class TracksViewModel : ViewModel() {
         isLoadingRecommendations = true
         viewModelScope.launch {
             try {
-                val recommendationsResponse = spotifyWebApiHelper.getRecommendations(
+                val recommendationsResponse = spotifyRepository.getRecommendations(
                     arrayOf(artistSeed),
                     arrayOf(genreSeed),
                     trackSeeds.toTypedArray(),
@@ -155,7 +157,7 @@ class TracksViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val newGenreSeed: String =
-                    spotifyWebApiHelper.getArtist(mainArtistId).genres.firstOrNull() ?: return@launch
+                    spotifyRepository.getArtist(mainArtistId).genres.firstOrNull() ?: return@launch
                 genreSeed = newGenreSeed
                 loadRecommendations(5)
             } catch (e: Exception) {
@@ -166,7 +168,7 @@ class TracksViewModel : ViewModel() {
     }
 
     private suspend fun loadTopTracksSeeds() {
-        val topTracksResponse = spotifyWebApiHelper.getTopTracks(3)
+        val topTracksResponse = spotifyRepository.getTopTracks(3)
         val topTracks = topTracksResponse.items
 
         trackSeeds.clear()
@@ -176,12 +178,12 @@ class TracksViewModel : ViewModel() {
 
         artistSeed = topMainArtistId
 
-        val newGenreSeed: String = spotifyWebApiHelper.getArtist(topMainArtistId).genres.firstOrNull() ?: return
+        val newGenreSeed: String = spotifyRepository.getArtist(topMainArtistId).genres.firstOrNull() ?: return
         genreSeed = newGenreSeed
     }
 
     private suspend fun loadMyUser() {
-        val user = spotifyWebApiHelper.getMe()
+        val user = spotifyRepository.getMe()
         _user.value = user
     }
 

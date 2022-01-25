@@ -3,53 +3,26 @@ package com.isaev.musicswipe
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
-import android.util.Log
 import androidx.core.content.edit
-import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Retrofit
-import retrofit2.create
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
+import javax.inject.Inject
+import javax.inject.Singleton
 
 
-object AuthorizationManager {
-
-    private const val TAG = "AuthorizationManager"
-
-    private const val BASE_URL = "https://accounts.spotify.com/"
-    private const val TOKEN_KEY = "token_key"
-    private const val REFRESH_TOKEN_KEY = "refresh_token_key"
-
-    private const val CLIENT_ID = "ff565d0979aa4da5810b5f3d55057c8f"
-    private const val REDIRECT_URI = "http://music.swipe.com"
+@Singleton
+class AuthorizationManager @Inject constructor(
+    private val authService: SpotifyAuthService
+) {
 
     private lateinit var codeVerifier: String
     private val codeChallenge: String by lazy { Pkce.generateCodeChallenge(codeVerifier) }
-
-    private val retrofit: Retrofit = Retrofit.Builder()
-        .baseUrl(BASE_URL)
-        .client(
-            OkHttpClient.Builder()
-                .addInterceptor(
-                    HttpLoggingInterceptor { message -> Log.i(TAG, message) }
-                        .apply { level = HttpLoggingInterceptor.Level.BODY }
-                )
-                .build()
-        )
-        .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
-        .build()
-
-    private val authService = retrofit.create<SpotifyAuthService>()
 
     private val _token: MutableStateFlow<String?> = MutableStateFlow(null)
     private var refreshToken: String? = null
@@ -111,6 +84,17 @@ object AuthorizationManager {
 
     private fun getPrefs(): SharedPreferences {
         return MusicSwipeApp.instance.getSharedPreferences("auth", Context.MODE_PRIVATE)
+    }
+
+    companion object {
+        const val TAG = "AuthorizationManager"
+
+        private const val BASE_URL = "https://accounts.spotify.com/"
+        private const val TOKEN_KEY = "token_key"
+        private const val REFRESH_TOKEN_KEY = "refresh_token_key"
+
+        private const val CLIENT_ID = "ff565d0979aa4da5810b5f3d55057c8f"
+        private const val REDIRECT_URI = "http://music.swipe.com"
     }
 }
 

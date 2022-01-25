@@ -11,6 +11,7 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import com.isaev.musicswipe.databinding.ActivityMainBinding
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), FragmentInteractor, FragmentOnAttachListener {
 
@@ -18,7 +19,11 @@ class MainActivity : AppCompatActivity(), FragmentInteractor, FragmentOnAttachLi
 
     private var showSplash: Boolean = true
 
+    @Inject
+    lateinit var authorizationManager: AuthorizationManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        MusicSwipeApp.instance.daggerComponent.inject(this)
         super.onCreate(savedInstanceState)
 
         val splash = installSplashScreen()
@@ -33,11 +38,11 @@ class MainActivity : AppCompatActivity(), FragmentInteractor, FragmentOnAttachLi
             supportFragmentManager.addFragmentOnAttachListener(this)
             lifecycleScope.launch {
                 try {
-                    AuthorizationManager.refreshTokens()
+                    authorizationManager.refreshTokens()
                 } catch (e: Exception) {
                     Log.i(TAG, e.stackTraceToString())
                 } finally {
-                    if (AuthorizationManager.isAuthorized()) {
+                    if (authorizationManager.isAuthorized()) {
                         supportFragmentManager.commit {
                             add(R.id.fragment_container, TracksFragment.newInstance(), null)
                         }
