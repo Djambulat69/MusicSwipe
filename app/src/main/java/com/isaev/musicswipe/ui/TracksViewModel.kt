@@ -28,6 +28,7 @@ class TracksViewModel @Inject constructor(
     private val _playbackState = MutableLiveData<PlaybackState>(
         PlaybackState(isPlaying = false, firstPlay = false)
     )
+    private val _loading = MutableLiveData<Boolean>()
 
     private val _completeEvents: MutableSharedFlow<Unit> = MutableSharedFlow()
     private val _errorLikeEvents: MutableSharedFlow<Unit> = MutableSharedFlow()
@@ -57,6 +58,7 @@ class TracksViewModel @Inject constructor(
     val tracks: LiveData<List<Track>> = _tracks
     val user: LiveData<User> = _user
     val playbackState: LiveData<PlaybackState> = _playbackState
+    val loading: LiveData<Boolean> = _loading
 
     val completeEvents: SharedFlow<Unit> = _completeEvents.asSharedFlow()
     val errorLikeEvents: SharedFlow<Unit> = _errorLikeEvents.asSharedFlow()
@@ -72,12 +74,14 @@ class TracksViewModel @Inject constructor(
             .onEach { isAuthorized ->
                 coroutineScope {
                     if (isAuthorized) {
+                        _loading.value = true
                         launch {
-                            loadTopTracksSeeds()
-                            loadRecommendations()
+                            getTopTracksSeeds()
+                            getMoreRecommendations(10)
+                            _loading.value = false
                         }
                         launch {
-                            loadMyUser()
+                            getMyUser()
                         }
                     }
                 }
@@ -107,16 +111,7 @@ class TracksViewModel @Inject constructor(
         isLoadingRecommendations = true
         viewModelScope.launch {
             try {
-                val recommendations = spotifyRepository.getRecommendations(
-                    arrayOf(artistSeed),
-                    arrayOf(genreSeed),
-                    trackSeeds.toTypedArray(),
-                    limit
-                )
-
-                val newTracks = recommendations.filter { it.previewUrl != null }
-
-                _tracks.value = _tracks.value?.plus(newTracks) ?: newTracks
+                getMoreRecommendations(limit)
             } catch (e: Exception) {
                 Log.i(TAG, e.stackTraceToString())
             } finally {
@@ -156,7 +151,7 @@ class TracksViewModel @Inject constructor(
                 val newGenreSeed: String =
                     spotifyRepository.getArtistTopGenre(mainArtistId) ?: return@launch
                 genreSeed = newGenreSeed
-                loadRecommendations(5)
+                getMoreRecommendations(5)
             } catch (e: Exception) {
                 _errorLikeEvents.emit(Unit)
                 Log.i(TAG, "onTrackLiked: ${e.stackTraceToString()}")
@@ -164,7 +159,18 @@ class TracksViewModel @Inject constructor(
         }
     }
 
-    private suspend fun loadTopTracksSeeds() {
+    private suspend fun getMoreRecommendations(limit: Int) {
+        val recommendations = spotifyRepository.getRecommendations(
+            arrayOf(artistSeed),
+            arrayOf(genreSeed),
+            trackSeeds.toTypedArray(),
+            limit
+        )
+
+        _tracks.value = _tracks.value?.plus(recommendations) ?: recommendations
+    }
+
+    private suspend fun getTopTracksSeeds() {
         val topTracks = spotifyRepository.getTopTracks(3)
 
         trackSeeds.clear()
@@ -178,7 +184,7 @@ class TracksViewModel @Inject constructor(
         genreSeed = newGenreSeed
     }
 
-    private suspend fun loadMyUser() {
+    private suspend fun getMyUser() {
         val user = spotifyRepository.getMe()
         _user.value = user
     }

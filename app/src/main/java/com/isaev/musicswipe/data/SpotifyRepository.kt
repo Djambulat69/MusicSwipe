@@ -18,7 +18,7 @@ class SpotifyRepository @Inject constructor(
             seedGenres,
             seedTracks,
             limit
-        )
+        ).filter { it.previewUrl != null }
 
     suspend fun getArtistTopGenre(artistId: String): String? = spotifyRemote.getArtist(artistId).genres.firstOrNull()
 

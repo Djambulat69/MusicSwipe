@@ -10,6 +10,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.animation.LinearInterpolator
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
@@ -86,6 +88,19 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
                 getCurrentPlayTrack()?.let {
                     viewModel.onPlayClicked()
                 }
+            }
+        }
+
+        viewModel.loading.observe(viewLifecycleOwner) { isLoading ->
+            with(binding) {
+                cardStack.isGone = isLoading
+                playbackButton.isGone = isLoading
+                trackProgressCircle.isGone = isLoading
+                spotifyButton.isGone = isLoading
+                dislikeButton.isGone = isLoading
+                likeButton.isGone = isLoading
+
+                loadingCircle.isVisible = isLoading
             }
         }
 
