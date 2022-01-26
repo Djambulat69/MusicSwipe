@@ -20,10 +20,10 @@ class MainActivity : AppCompatActivity(), FragmentInteractor, FragmentOnAttachLi
     private var showSplash: Boolean = true
 
     @Inject
-    lateinit var authorizationManager: AuthorizationManager
+    lateinit var userRepository: UserRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        MusicSwipeApp.instance.daggerComponent.inject(this)
+        myApplication.daggerComponent.inject(this)
         super.onCreate(savedInstanceState)
 
         val splash = installSplashScreen()
@@ -38,11 +38,11 @@ class MainActivity : AppCompatActivity(), FragmentInteractor, FragmentOnAttachLi
             supportFragmentManager.addFragmentOnAttachListener(this)
             lifecycleScope.launch {
                 try {
-                    authorizationManager.refreshTokens()
+                    userRepository.refreshTokens()
                 } catch (e: Exception) {
                     Log.i(TAG, e.stackTraceToString())
                 } finally {
-                    if (authorizationManager.isAuthorized()) {
+                    if (userRepository.isAuthorized()) {
                         supportFragmentManager.commit {
                             add(R.id.fragment_container, TracksFragment.newInstance(), null)
                         }

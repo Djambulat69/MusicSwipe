@@ -19,12 +19,12 @@ class WebViewFragment : Fragment(R.layout.fragment_web_view) {
     private val binding: FragmentWebViewBinding get() = _binding!!
 
     @Inject
-    lateinit var authorizationManager: AuthorizationManager
+    lateinit var userRepository: UserRepository
 
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        MusicSwipeApp.instance.daggerComponent.inject(this)
+        myApplication.daggerComponent.inject(this)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -40,7 +40,7 @@ class WebViewFragment : Fragment(R.layout.fragment_web_view) {
                         if (code != null) {
                             lifecycleScope.launch {
                                 try {
-                                    authorizationManager.authorize(code)
+                                    userRepository.authorize(code)
                                 } catch (e: Exception) {
                                     Log.i(TAG, e.stackTraceToString())
                                 } finally {
@@ -57,10 +57,15 @@ class WebViewFragment : Fragment(R.layout.fragment_web_view) {
                 }
             }
             viewLifecycleScope.launch {
-                val url = authorizationManager.authorizeUrl()
+                val url = userRepository.authorizeUrl()
                 loadUrl(url)
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     private fun openTracks() {

@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 class TracksViewModel @Inject constructor(
     private val spotifyRepository: SpotifyRepository,
-    private val authorizationManager: AuthorizationManager
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _tracks = MutableLiveData<List<PlayTrack>>()
@@ -61,7 +61,7 @@ class TracksViewModel @Inject constructor(
         get() = mediaPlayer.duration
 
     init {
-        authorizationManager.authState
+        userRepository.authState
             .onEach { isAuthorized ->
                 coroutineScope {
                     if (isAuthorized) {

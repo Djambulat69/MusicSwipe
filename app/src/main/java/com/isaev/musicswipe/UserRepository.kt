@@ -1,24 +1,27 @@
 package com.isaev.musicswipe
 
-import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
 import androidx.core.content.edit
+import com.isaev.musicswipe.di.UserModule.Companion.USER_PREFS_NAME
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 
 @Singleton
-class AuthorizationManager @Inject constructor(
-    private val authService: SpotifyAuthService
+class UserRepository @Inject constructor(
+    private val authService: SpotifyAuthService,
+    @Named(USER_PREFS_NAME) private val userPrefs: SharedPreferences
 ) {
 
     private lateinit var codeVerifier: String
@@ -53,8 +56,12 @@ class AuthorizationManager @Inject constructor(
     }
 
     suspend fun authorize(authCode: String) {
-        val response = requestToken(authCode)
-        _token.value = response.accessToken
+        val response = authService.requestToken(
+            "authorization_code", authCode, REDIRECT_URI, CLIENT_ID, codeVerifier
+        )
+
+        _token.update { response.accessToken }
+
         refreshToken = response.refreshToken
 
         getPrefs().edit {
@@ -77,14 +84,7 @@ class AuthorizationManager @Inject constructor(
         }
     }
 
-    private suspend fun requestToken(code: String) =
-        authService.requestToken(
-            "authorization_code", code, REDIRECT_URI, CLIENT_ID, codeVerifier
-        )
-
-    private fun getPrefs(): SharedPreferences {
-        return MusicSwipeApp.instance.getSharedPreferences("auth", Context.MODE_PRIVATE)
-    }
+    private fun getPrefs(): SharedPreferences = userPrefs
 
     companion object {
         const val TAG = "AuthorizationManager"

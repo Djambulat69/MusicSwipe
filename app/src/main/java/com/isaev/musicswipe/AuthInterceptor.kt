@@ -5,12 +5,12 @@ import okhttp3.Response
 import javax.inject.Inject
 
 class AuthInterceptor @Inject constructor(
-    private val authorizationManager: AuthorizationManager
+    private val userRepository: UserRepository
 ) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response =
-        if (authorizationManager.isAuthorized()) {
-            val token = authorizationManager.token
+        if (userRepository.isAuthorized()) {
+            val token = userRepository.token
             val request = chain.request().newBuilder().addHeader(AUTH_HEADER, "Bearer $token").build()
             chain.proceed(request)
         } else {

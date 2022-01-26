@@ -47,7 +47,7 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
-        MusicSwipeApp.instance.daggerComponent.inject(this)
+        myApplication.daggerComponent.inject(this)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

@@ -73,3 +73,9 @@ fun <VM : ViewModel> createViewModelFactory(createViewModel: () -> VM): ViewMode
         }
     }
 }
+
+val Context.myApplication: MusicSwipeApp
+    get() = applicationContext as MusicSwipeApp
+
+val Fragment.myApplication: MusicSwipeApp
+    get() = requireContext().myApplication
