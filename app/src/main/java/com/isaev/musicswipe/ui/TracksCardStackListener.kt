@@ -1,4 +1,4 @@
-package com.isaev.musicswipe
+package com.isaev.musicswipe.ui
 
 import android.os.Bundle
 import android.view.View
@@ -27,10 +27,10 @@ class TracksCardStackListener(
             viewModel.loadRecommendations()
         }
 
-        val playTrack = adapter.tracks.getOrNull(position)
+        val track = adapter.tracks.getOrNull(position)
 
-        playTrack?.track?.previewUrl?.let {
-            viewModel.prepareNewTrack(playTrack.track.previewUrl, position)
+        track?.previewUrl?.let {
+            viewModel.prepareNewTrack(track.previewUrl)
             onPrepareTrack()
         }
     }

@@ -1,8 +1,8 @@
 package com.isaev.musicswipe.di
 
-import com.isaev.musicswipe.MainActivity
-import com.isaev.musicswipe.TracksFragment
-import com.isaev.musicswipe.WebViewFragment
+import com.isaev.musicswipe.ui.MainActivity
+import com.isaev.musicswipe.ui.TracksFragment
+import com.isaev.musicswipe.ui.WebViewFragment
 import dagger.Component
 import javax.inject.Singleton
 

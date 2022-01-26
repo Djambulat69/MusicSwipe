@@ -12,6 +12,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
+import com.isaev.musicswipe.ui.FragmentInteractor
+import com.isaev.musicswipe.ui.MusicSwipeApp
 import com.yuyakaido.android.cardstackview.*
 
 fun Fragment.makeSnackBar(text: CharSequence, duration: Int = Snackbar.LENGTH_SHORT): Snackbar {

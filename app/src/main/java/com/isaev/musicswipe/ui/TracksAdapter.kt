@@ -1,15 +1,16 @@
-package com.isaev.musicswipe
+package com.isaev.musicswipe.ui
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.RecyclerView
+import com.isaev.musicswipe.R
+import com.isaev.musicswipe.data.Track
 import com.yuyakaido.android.cardstackview.CardStackLayoutManager
 
 class TracksAdapter(
     diffCallback: TracksDiffCallback,
-    private val layoutManager: CardStackLayoutManager,
-    private val mediaPlayer: (position: Int) -> Unit
+    private val layoutManager: CardStackLayoutManager
 ) :
     RecyclerView.Adapter<TrackViewHolder>() {
 
@@ -21,7 +22,7 @@ class TracksAdapter(
         }
     }
 
-    var tracks: List<PlayTrack>
+    var tracks: List<Track>
         get() = differ.currentList
         set(newTracks) {
             differ.submitList(newTracks)

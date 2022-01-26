@@ -1,4 +1,4 @@
-package com.isaev.musicswipe
+package com.isaev.musicswipe.ui
 
 import android.content.Context
 import android.os.Bundle
@@ -9,6 +9,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.isaev.musicswipe.*
 import com.isaev.musicswipe.databinding.FragmentWebViewBinding
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -19,7 +20,7 @@ class WebViewFragment : Fragment(R.layout.fragment_web_view) {
     private val binding: FragmentWebViewBinding get() = _binding!!
 
     @Inject
-    lateinit var userRepository: UserRepository
+    lateinit var spotifyAuthService: SpotifyAuthService
 
 
     override fun onAttach(context: Context) {
@@ -40,7 +41,7 @@ class WebViewFragment : Fragment(R.layout.fragment_web_view) {
                         if (code != null) {
                             lifecycleScope.launch {
                                 try {
-                                    userRepository.authorize(code)
+                                    spotifyAuthService.authorize(code)
                                 } catch (e: Exception) {
                                     Log.i(TAG, e.stackTraceToString())
                                 } finally {
@@ -57,7 +58,7 @@ class WebViewFragment : Fragment(R.layout.fragment_web_view) {
                 }
             }
             viewLifecycleScope.launch {
-                val url = userRepository.authorizeUrl()
+                val url = spotifyAuthService.authorizeUrl()
                 loadUrl(url)
             }
         }

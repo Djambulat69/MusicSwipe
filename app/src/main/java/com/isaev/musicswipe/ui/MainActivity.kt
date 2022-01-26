@@ -1,48 +1,40 @@
-package com.isaev.musicswipe
+package com.isaev.musicswipe.ui
 
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentOnAttachListener
 import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
+import com.isaev.musicswipe.R
+import com.isaev.musicswipe.SpotifyAuthService
 import com.isaev.musicswipe.databinding.ActivityMainBinding
+import com.isaev.musicswipe.myApplication
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class MainActivity : AppCompatActivity(), FragmentInteractor, FragmentOnAttachListener {
+class MainActivity : AppCompatActivity(), FragmentInteractor {
 
     private lateinit var binding: ActivityMainBinding
 
-    private var showSplash: Boolean = true
-
     @Inject
-    lateinit var userRepository: UserRepository
+    lateinit var spotifyAuthService: SpotifyAuthService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         myApplication.daggerComponent.inject(this)
         super.onCreate(savedInstanceState)
 
-        val splash = installSplashScreen()
-        splash.setKeepOnScreenCondition {
-            showSplash
-        }
-
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         if (savedInstanceState == null) {
-            supportFragmentManager.addFragmentOnAttachListener(this)
             lifecycleScope.launch {
                 try {
-                    userRepository.refreshTokens()
+                    spotifyAuthService.refreshTokens()
                 } catch (e: Exception) {
                     Log.i(TAG, e.stackTraceToString())
                 } finally {
-                    if (userRepository.isAuthorized()) {
+                    if (spotifyAuthService.isAuthorized()) {
                         supportFragmentManager.commit {
                             add(R.id.fragment_container, TracksFragment.newInstance(), null)
                         }
@@ -53,8 +45,6 @@ class MainActivity : AppCompatActivity(), FragmentInteractor, FragmentOnAttachLi
                     }
                 }
             }
-        } else {
-            showSplash = false
         }
     }
 
@@ -80,11 +70,6 @@ class MainActivity : AppCompatActivity(), FragmentInteractor, FragmentOnAttachLi
 
     override fun openTracks() {
         replaceFragment(TracksFragment.newInstance())
-    }
-
-    override fun onAttachFragment(fragmentManager: FragmentManager, fragment: Fragment) {
-        showSplash = false
-        fragmentManager.removeFragmentOnAttachListener(this)
     }
 
     private fun replaceFragment(fragment: Fragment) {

@@ -1,8 +1,8 @@
 package com.isaev.musicswipe.di
 
 import android.util.Log
+import com.isaev.musicswipe.SpotifyAuthApi
 import com.isaev.musicswipe.SpotifyAuthService
-import com.isaev.musicswipe.UserRepository
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides
@@ -28,7 +28,7 @@ class AuthModule {
             .client(
                 OkHttpClient.Builder()
                     .addInterceptor(
-                        HttpLoggingInterceptor { message -> Log.i(UserRepository.TAG, message) }
+                        HttpLoggingInterceptor { message -> Log.i(SpotifyAuthService.TAG, message) }
                             .apply { level = HttpLoggingInterceptor.Level.BODY }
                     )
                     .build()
@@ -39,7 +39,7 @@ class AuthModule {
 
     @Singleton
     @Provides
-    fun provideAuthService(@Named("AuthRetrofit") retrofit: Retrofit): SpotifyAuthService {
+    fun provideAuthService(@Named("AuthRetrofit") retrofit: Retrofit): SpotifyAuthApi {
         return retrofit.create()
     }
 

@@ -1,4 +1,4 @@
-package com.isaev.musicswipe
+package com.isaev.musicswipe.ui
 
 interface FragmentInteractor {
     fun back()

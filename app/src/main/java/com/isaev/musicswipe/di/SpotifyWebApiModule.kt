@@ -1,9 +1,9 @@
 package com.isaev.musicswipe.di
 
 import android.util.Log
-import com.isaev.musicswipe.AuthInterceptor
-import com.isaev.musicswipe.SpotifyRepository
-import com.isaev.musicswipe.SpotifyWebApi
+import com.isaev.musicswipe.data.AuthInterceptor
+import com.isaev.musicswipe.data.SpotifyRepository
+import com.isaev.musicswipe.data.SpotifyWebApi
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides

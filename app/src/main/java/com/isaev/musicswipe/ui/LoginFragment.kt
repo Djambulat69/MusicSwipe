@@ -1,9 +1,11 @@
-package com.isaev.musicswipe
+package com.isaev.musicswipe.ui
 
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
+import com.isaev.musicswipe.R
 import com.isaev.musicswipe.databinding.FragmentLoginBinding
+import com.isaev.musicswipe.fragmentInteractor
 
 class LoginFragment : Fragment(R.layout.fragment_login) {
 

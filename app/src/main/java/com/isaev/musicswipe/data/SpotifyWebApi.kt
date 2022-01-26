@@ -1,4 +1,4 @@
-package com.isaev.musicswipe
+package com.isaev.musicswipe.data
 
 import retrofit2.http.GET
 import retrofit2.http.Path

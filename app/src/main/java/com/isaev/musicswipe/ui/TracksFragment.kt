@@ -1,4 +1,4 @@
-package com.isaev.musicswipe
+package com.isaev.musicswipe.ui
 
 import android.animation.ObjectAnimator
 import android.content.ActivityNotFoundException
@@ -16,6 +16,8 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
+import com.isaev.musicswipe.*
+import com.isaev.musicswipe.data.Track
 import com.isaev.musicswipe.databinding.FragmentTracksBinding
 import com.yuyakaido.android.cardstackview.CardStackLayoutManager
 import com.yuyakaido.android.cardstackview.StackFrom
@@ -57,7 +59,9 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
             requireContext(), TracksCardStackListener(
                 viewModel,
                 binding.cardStack,
-                onPrepareTrack = { binding.trackProgressCircle.isIndeterminate = true }
+                onPrepareTrack = {
+                    binding.trackProgressCircle.isIndeterminate = true
+                }
             ) { savedInstanceState }
         ).apply {
             setStackFrom(StackFrom.Top)
@@ -71,9 +75,7 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
 
         with(binding) {
             cardStack.adapter =
-                TracksAdapter(TracksDiffCallback(), cardStack.layoutManager as CardStackLayoutManager) { position ->
-                    viewModel.onTrackPlayClicked(position)
-                }
+                TracksAdapter(TracksDiffCallback(), cardStack.layoutManager as CardStackLayoutManager)
             likeButton.setOnClickListener {
                 cardStack.swipeRight()
             }
@@ -81,8 +83,8 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
                 cardStack.swipeLeft()
             }
             playbackButton.setOnClickListener {
-                getCurrentPlayTrack()?.let { topTrack ->
-                    viewModel.onTrackPlayClicked(topTrack)
+                getCurrentPlayTrack()?.let {
+                    viewModel.onPlayClicked()
                 }
             }
         }
@@ -92,7 +94,7 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
         }
 
         viewModel.playbackState.observe(viewLifecycleOwner) { playbackState ->
-            if (playbackState.isPlaying) {
+            if (!playbackState.isPlaying) {
                 progressAnimator.pause()
                 viewModel.pausePlayer()
                 binding.playbackButton.setImageResource(R.drawable.ic_baseline_play_arrow)
@@ -121,8 +123,11 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
                     object : CustomTarget<Drawable>() {
                         override fun onLoadCleared(placeholder: Drawable?) {}
 
-                        override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
-                            binding.tracksToolbar.menu.findItem(R.id.profile_menu_item).icon = resource
+                        override fun onResourceReady(
+                            profileIconDrawable: Drawable,
+                            transition: Transition<in Drawable>?
+                        ) {
+                            binding.tracksToolbar.menu.findItem(R.id.profile_menu_item).icon = profileIconDrawable
                         }
                     }
                 )
@@ -155,7 +160,7 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
         if (installedSpotify) {
             binding.spotifyButton.text = getString(R.string.open_spotify)
             binding.spotifyButton.setOnClickListener {
-                getCurrentPlayTrack()?.track?.let { topTrack ->
+                getCurrentPlayTrack()?.let { topTrack ->
                     openTrackInSpotifyApp(topTrack.uri)
                 }
             }
@@ -171,8 +176,8 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
         super.onResume()
 
         val topTrack = getCurrentPlayTrack()
-        if (topTrack != null && !topTrack.isPlaying) {
-            viewModel.onTrackPlayClicked(topTrack)
+        if (topTrack != null && viewModel.playbackState.value?.isPlaying == false) {
+            viewModel.onPlayClicked()
         }
     }
 
@@ -180,8 +185,8 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
         super.onPause()
 
         val topTrack = getCurrentPlayTrack()
-        if (topTrack != null && topTrack.isPlaying) {
-            viewModel.onTrackPlayClicked(topTrack)
+        if (topTrack != null && viewModel.playbackState.value?.isPlaying == true) {
+            viewModel.onPlayClicked()
         }
     }
 
@@ -201,7 +206,7 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
         progressAnimator.duration = (viewModel.duration - viewModel.currentPosition).toLong()
     }
 
-    private fun getCurrentPlayTrack(): PlayTrack? {
+    private fun getCurrentPlayTrack(): Track? {
         val position = (binding.cardStack.layoutManager as CardStackLayoutManager?)?.topPosition
         return position?.let {
             (binding.cardStack.adapter as TracksAdapter).tracks.getOrNull(position)

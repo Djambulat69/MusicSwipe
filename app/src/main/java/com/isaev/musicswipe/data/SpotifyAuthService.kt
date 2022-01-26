@@ -3,13 +3,12 @@ package com.isaev.musicswipe
 import android.content.SharedPreferences
 import android.net.Uri
 import androidx.core.content.edit
+import com.isaev.musicswipe.data.AuthTokenResponse
 import com.isaev.musicswipe.di.UserModule.Companion.USER_PREFS_NAME
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
@@ -19,8 +18,8 @@ import javax.inject.Singleton
 
 
 @Singleton
-class UserRepository @Inject constructor(
-    private val authService: SpotifyAuthService,
+class SpotifyAuthService @Inject constructor(
+    private val authApi: SpotifyAuthApi,
     @Named(USER_PREFS_NAME) private val userPrefs: SharedPreferences
 ) {
 
@@ -56,7 +55,7 @@ class UserRepository @Inject constructor(
     }
 
     suspend fun authorize(authCode: String) {
-        val response = authService.requestToken(
+        val response = authApi.requestToken(
             "authorization_code", authCode, REDIRECT_URI, CLIENT_ID, codeVerifier
         )
 
@@ -64,30 +63,27 @@ class UserRepository @Inject constructor(
 
         refreshToken = response.refreshToken
 
-        getPrefs().edit {
+        userPrefs.edit {
             putString(TOKEN_KEY, response.accessToken)
             putString(REFRESH_TOKEN_KEY, response.refreshToken)
         }
     }
 
     suspend fun refreshTokens() {
-        val prefs = getPrefs()
-        val savedRefreshToken = prefs.getString(REFRESH_TOKEN_KEY, null) ?: return
+        val savedRefreshToken = userPrefs.getString(REFRESH_TOKEN_KEY, null) ?: return
 
-        val response = authService.refreshToken("refresh_token", savedRefreshToken, CLIENT_ID)
+        val response = authApi.refreshToken("refresh_token", savedRefreshToken, CLIENT_ID)
 
-        _token.value = response.accessToken
+        _token.update { response.accessToken }
 
-        getPrefs().edit {
+        userPrefs.edit {
             putString(TOKEN_KEY, response.accessToken)
             putString(REFRESH_TOKEN_KEY, response.refreshToken)
         }
     }
 
-    private fun getPrefs(): SharedPreferences = userPrefs
-
     companion object {
-        const val TAG = "AuthorizationManager"
+        const val TAG = "UserRepository"
 
         private const val BASE_URL = "https://accounts.spotify.com/"
         private const val TOKEN_KEY = "token_key"
@@ -98,7 +94,7 @@ class UserRepository @Inject constructor(
     }
 }
 
-interface SpotifyAuthService {
+interface SpotifyAuthApi {
 
     @FormUrlEncoded
     @POST("api/token")
@@ -118,12 +114,3 @@ interface SpotifyAuthService {
         @Field("client_id") clientId: String
     ): AuthTokenResponse
 }
-
-@Serializable
-data class AuthTokenResponse(
-    @SerialName("access_token") val accessToken: String,
-    @SerialName("token_type") val tokenType: String,
-    @SerialName("scope") val scope: String,
-    @SerialName("expires_in") val expiresIn: Int,
-    @SerialName("refresh_token") val refreshToken: String?
-)

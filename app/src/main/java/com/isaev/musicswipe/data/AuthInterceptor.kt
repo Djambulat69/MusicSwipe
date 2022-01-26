@@ -1,16 +1,17 @@
-package com.isaev.musicswipe
+package com.isaev.musicswipe.data
 
+import com.isaev.musicswipe.SpotifyAuthService
 import okhttp3.Interceptor
 import okhttp3.Response
 import javax.inject.Inject
 
 class AuthInterceptor @Inject constructor(
-    private val userRepository: UserRepository
+    private val spotifyAuthService: SpotifyAuthService
 ) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response =
-        if (userRepository.isAuthorized()) {
-            val token = userRepository.token
+        if (spotifyAuthService.isAuthorized()) {
+            val token = spotifyAuthService.token
             val request = chain.request().newBuilder().addHeader(AUTH_HEADER, "Bearer $token").build()
             chain.proceed(request)
         } else {

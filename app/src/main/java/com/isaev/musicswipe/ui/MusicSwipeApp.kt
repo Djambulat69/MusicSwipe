@@ -1,4 +1,4 @@
-package com.isaev.musicswipe
+package com.isaev.musicswipe.ui
 
 import android.app.Application
 import com.isaev.musicswipe.di.*
