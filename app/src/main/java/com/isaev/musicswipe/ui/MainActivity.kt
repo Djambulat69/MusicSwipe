@@ -7,7 +7,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import com.isaev.musicswipe.R
-import com.isaev.musicswipe.SpotifyAuthService
+import com.isaev.musicswipe.data.SpotifyAuthService
 import com.isaev.musicswipe.databinding.ActivityMainBinding
 import com.isaev.musicswipe.myApplication
 import kotlinx.coroutines.launch
@@ -34,14 +34,8 @@ class MainActivity : AppCompatActivity(), FragmentInteractor {
                 } catch (e: Exception) {
                     Log.i(TAG, e.stackTraceToString())
                 } finally {
-                    if (spotifyAuthService.isAuthorized()) {
-                        supportFragmentManager.commit {
-                            add(R.id.fragment_container, TracksFragment.newInstance(), null)
-                        }
-                    } else {
-                        supportFragmentManager.commit {
-                            add(R.id.fragment_container, LoginFragment.newInstance(), null)
-                        }
+                    supportFragmentManager.commit {
+                        add(R.id.fragment_container, TracksFragment.newInstance(), null)
                     }
                 }
             }
@@ -60,12 +54,8 @@ class MainActivity : AppCompatActivity(), FragmentInteractor {
         supportFragmentManager.popBackStack()
     }
 
-    override fun openLogin() {
-        replaceFragment(LoginFragment.newInstance())
-    }
-
     override fun openLoginWebView() {
-        replaceFragment(WebViewFragment.newInstance())
+        openFragment(WebViewFragment.newInstance())
     }
 
     override fun openTracks() {
@@ -74,6 +64,13 @@ class MainActivity : AppCompatActivity(), FragmentInteractor {
 
     private fun replaceFragment(fragment: Fragment) {
         supportFragmentManager.commit {
+            replace(R.id.fragment_container, fragment)
+        }
+    }
+
+    private fun openFragment(fragment: Fragment) {
+        supportFragmentManager.commit {
+            addToBackStack(null)
             replace(R.id.fragment_container, fragment)
         }
     }

@@ -8,7 +8,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.isaev.musicswipe.PlaybackState
-import com.isaev.musicswipe.SpotifyAuthService
 import com.isaev.musicswipe.data.SpotifyRepository
 import com.isaev.musicswipe.data.Track
 import com.isaev.musicswipe.data.User
@@ -20,7 +19,6 @@ import javax.inject.Inject
 
 class TracksViewModel @Inject constructor(
     private val spotifyRepository: SpotifyRepository,
-    private val userRepository: SpotifyAuthService
 ) : ViewModel() {
 
     private val _tracks = MutableLiveData<List<Track>>()
@@ -59,6 +57,7 @@ class TracksViewModel @Inject constructor(
     val user: LiveData<User> = _user
     val playbackState: LiveData<PlaybackState> = _playbackState
     val loading: LiveData<Boolean> = _loading
+    val authState: Flow<Boolean> = spotifyRepository.authState
 
     val completeEvents: SharedFlow<Unit> = _completeEvents.asSharedFlow()
     val errorLikeEvents: SharedFlow<Unit> = _errorLikeEvents.asSharedFlow()
@@ -70,7 +69,7 @@ class TracksViewModel @Inject constructor(
         get() = mediaPlayer.duration
 
     init {
-        userRepository.authState
+        spotifyRepository.authState
             .onEach { isAuthorized ->
                 coroutineScope {
                     if (isAuthorized) {

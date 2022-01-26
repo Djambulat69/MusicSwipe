@@ -9,8 +9,12 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.isaev.musicswipe.*
+import com.isaev.musicswipe.R
+import com.isaev.musicswipe.data.SpotifyAuthService
 import com.isaev.musicswipe.databinding.FragmentWebViewBinding
+import com.isaev.musicswipe.fragmentInteractor
+import com.isaev.musicswipe.myApplication
+import com.isaev.musicswipe.viewLifecycleScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -45,11 +49,11 @@ class WebViewFragment : Fragment(R.layout.fragment_web_view) {
                                 } catch (e: Exception) {
                                     Log.i(TAG, e.stackTraceToString())
                                 } finally {
-                                    openTracks()
+                                    fragmentInteractor?.back()
                                 }
                             }
                         } else {
-                            openLogin()
+                            fragmentInteractor?.back()
                         }
                         true
                     } else {
@@ -67,14 +71,6 @@ class WebViewFragment : Fragment(R.layout.fragment_web_view) {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    private fun openTracks() {
-        fragmentInteractor?.openTracks()
-    }
-
-    private fun openLogin() {
-        fragmentInteractor?.openLogin()
     }
 
     companion object {

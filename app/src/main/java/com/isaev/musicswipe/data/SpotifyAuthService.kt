@@ -1,10 +1,10 @@
-package com.isaev.musicswipe
+package com.isaev.musicswipe.data
 
 import android.content.SharedPreferences
 import android.net.Uri
 import androidx.core.content.edit
-import com.isaev.musicswipe.data.AuthTokenResponse
-import com.isaev.musicswipe.di.UserModule.Companion.USER_PREFS_NAME
+import com.isaev.musicswipe.Pkce
+import com.isaev.musicswipe.di.UserModule
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
@@ -20,7 +20,7 @@ import javax.inject.Singleton
 @Singleton
 class SpotifyAuthService @Inject constructor(
     private val authApi: SpotifyAuthApi,
-    @Named(USER_PREFS_NAME) private val userPrefs: SharedPreferences
+    @Named(UserModule.USER_PREFS_NAME) private val userPrefs: SharedPreferences
 ) {
 
     private lateinit var codeVerifier: String

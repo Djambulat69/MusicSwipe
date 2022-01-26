@@ -1,11 +1,15 @@
 package com.isaev.musicswipe.data
 
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 
 class SpotifyRepository @Inject constructor(
-    private val spotifyRemote: SpotifyRemoteDataSource
+    private val spotifyRemote: SpotifyRemoteDataSource,
+    private val spotifyAuthService: SpotifyAuthService
 ) {
+
+    val authState: Flow<Boolean> = spotifyAuthService.authState
 
     suspend fun getRecommendations(
         seedArtists: Array<String>,
