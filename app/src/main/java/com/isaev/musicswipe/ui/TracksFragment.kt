@@ -66,6 +66,12 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
         }
 
         with(binding) {
+            cardStack.apply {
+                setHasFixedSize(true)
+                setItemViewCacheSize(5)
+                isNestedScrollingEnabled = false
+            }
+
             cardStack.adapter =
                 TracksAdapter(TracksDiffCallback(), cardStack.layoutManager as CardStackLayoutManager)
             likeButton.setOnClickListener {

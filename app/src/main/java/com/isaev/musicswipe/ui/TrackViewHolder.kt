@@ -14,31 +14,50 @@ class TrackViewHolder(view: View) :
 
     private val binding: TrackCardItemBinding = TrackCardItemBinding.bind(itemView)
 
-    fun bind(track: Track) {
-        var isFull = false
-        with(binding) {
-            val fullTrackName = track.name
-            if (fullTrackName.length > 30) {
-                val trunkedTitle = context.getString(R.string.trunked_title, track.name.take(30))
-                trackName.text = trunkedTitle
-                trackName.setOnClickListener {
-                    if (isFull) {
-                        trackName.text = trunkedTitle
-                    } else {
-                        trackName.text = fullTrackName
-                    }
-                    isFull = !isFull
+    private var trimmedTrackName: String? = null
+    private var trackName: String? = null
+        set(newTrackName) {
+            field = newTrackName
+            if (newTrackName != null) {
+                trimmedTrackName = if (newTrackName.length > TRIMMED_LENGTH) {
+                    context.getString(R.string.trunked_title, newTrackName.take(TRIMMED_LENGTH))
+                } else {
+                    newTrackName
                 }
-            } else {
-                trackName.text = fullTrackName
-                trackName.setOnClickListener(null)
             }
+        }
+    private var isFull = false
+
+    init {
+        binding.trackName.setOnClickListener {
+            val length = trackName?.length
+            if (length != null && length > TRIMMED_LENGTH) {
+                if (isFull) {
+                    binding.trackName.text = trimmedTrackName
+                } else {
+                    binding.trackName.text = trackName
+                }
+                isFull = !isFull
+            }
+        }
+    }
+
+    fun bind(track: Track) {
+        trackName = track.name
+        isFull = false
+
+        with(binding) {
+            trackName.text = trimmedTrackName
             trackArtists.text = track.artists.joinToString(separator = ", ") { it.name }
-            Glide.with(itemView.context)
+            Glide.with(context)
                 .load(track.album.images.firstOrNull()?.url)
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .placeholder(R.drawable.ic_baseline_album_placeholder)
                 .into(trackCover)
         }
+    }
+
+    private companion object {
+        private const val TRIMMED_LENGTH = 30
     }
 }
