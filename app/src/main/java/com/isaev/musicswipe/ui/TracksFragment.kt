@@ -24,7 +24,6 @@ import com.isaev.musicswipe.data.Track
 import com.isaev.musicswipe.databinding.FragmentTracksBinding
 import com.yuyakaido.android.cardstackview.CardStackLayoutManager
 import com.yuyakaido.android.cardstackview.StackFrom
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -96,7 +95,6 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
 
         viewModel.authState
             .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.CREATED)
-            .debounce(300)
             .onEach { isAuthorized ->
                 with(binding) {
 //                    showPlayerUi(isAuthorized)

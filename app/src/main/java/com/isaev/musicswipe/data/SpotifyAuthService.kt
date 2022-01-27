@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import android.net.Uri
 import androidx.core.content.edit
 import com.isaev.musicswipe.Pkce
+import com.isaev.musicswipe.Token
 import com.isaev.musicswipe.di.UserModule
 import kotlinx.coroutines.flow.*
 import retrofit2.http.Field
@@ -23,13 +24,13 @@ class SpotifyAuthService @Inject constructor(
     private lateinit var codeVerifier: String
     private val codeChallenge: String by lazy { Pkce.generateCodeChallenge(codeVerifier) }
 
-    private val _token: MutableStateFlow<String?> = MutableStateFlow(null)
+    private val _token: MutableStateFlow<Token?> = MutableStateFlow(null)
     private var refreshToken: String? = null
 
-    val token: String get() = _token.value!!
-    val authState: Flow<Boolean> = _token.map { it != null }.drop(1)
+    val token: String get() = ((_token.value!!) as Token.AccessToken).token
+    val authState: Flow<Boolean> = _token.filterNotNull().map { it is Token.AccessToken }
 
-    fun isAuthorized(): Boolean = _token.value != null
+    fun isAuthorized(): Boolean = _token.value is Token.AccessToken
 
     suspend fun authorizeUrl(): String {
         if (!::codeVerifier.isInitialized) {
@@ -56,7 +57,7 @@ class SpotifyAuthService @Inject constructor(
             "authorization_code", authCode, REDIRECT_URI, CLIENT_ID, codeVerifier
         )
 
-        _token.update { response.accessToken }
+        _token.update { Token.AccessToken(response.accessToken) }
 
         refreshToken = response.refreshToken
 
@@ -67,15 +68,19 @@ class SpotifyAuthService @Inject constructor(
     }
 
     suspend fun refreshTokens() {
-        val savedRefreshToken = userPrefs.getString(REFRESH_TOKEN_KEY, null) ?: return
+        val savedRefreshToken = userPrefs.getString(REFRESH_TOKEN_KEY, null)
 
-        val response = authApi.refreshToken("refresh_token", savedRefreshToken, CLIENT_ID)
+        if (savedRefreshToken == null) {
+            _token.value = Token.EmptyToken
+        } else {
+            val response = authApi.refreshToken("refresh_token", savedRefreshToken, CLIENT_ID)
 
-        _token.update { response.accessToken }
+            _token.update { Token.AccessToken(response.accessToken) }
 
-        userPrefs.edit {
-            putString(TOKEN_KEY, response.accessToken)
-            putString(REFRESH_TOKEN_KEY, response.refreshToken)
+            userPrefs.edit {
+                putString(TOKEN_KEY, response.accessToken)
+                putString(REFRESH_TOKEN_KEY, response.refreshToken)
+            }
         }
     }
 
