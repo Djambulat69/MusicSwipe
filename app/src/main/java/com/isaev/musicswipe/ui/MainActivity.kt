@@ -1,7 +1,6 @@
 package com.isaev.musicswipe.ui
 
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
@@ -9,7 +8,6 @@ import com.isaev.musicswipe.R
 import com.isaev.musicswipe.data.SpotifyAuthService
 import com.isaev.musicswipe.databinding.ActivityMainBinding
 import com.isaev.musicswipe.myApplication
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), FragmentInteractor {
@@ -29,13 +27,6 @@ class MainActivity : AppCompatActivity(), FragmentInteractor {
         if (savedInstanceState == null) {
             supportFragmentManager.commit {
                 add(R.id.fragment_container, TracksFragment.newInstance(), null)
-            }
-            myApplication.applicationScope.launch {
-                try {
-                    spotifyAuthService.refreshTokens()
-                } catch (e: Exception) {
-                    Log.i(TAG, e.stackTraceToString())
-                }
             }
         }
     }

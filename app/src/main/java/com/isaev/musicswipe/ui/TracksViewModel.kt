@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.isaev.musicswipe.PlaybackState
+import com.isaev.musicswipe.Token
 import com.isaev.musicswipe.data.SpotifyRepository
 import com.isaev.musicswipe.data.Track
 import com.isaev.musicswipe.data.User
@@ -22,7 +23,7 @@ class TracksViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _tracks = MutableLiveData<List<Track>>()
-    private val _user = MutableLiveData<User>()
+    private val _user = MutableLiveData<User?>()
     private val _playbackState = MutableLiveData<PlaybackState>(
         PlaybackState(isPlaying = false, firstPlay = false)
     )
@@ -40,10 +41,10 @@ class TracksViewModel @Inject constructor(
     private var genreSeed = ""
 
     val tracks: LiveData<List<Track>> = _tracks
-    val user: LiveData<User> = _user
+    val user: LiveData<User?> = _user
     val playbackState: LiveData<PlaybackState> = _playbackState
     val loading: LiveData<Boolean> = _loading
-    val authState: Flow<Boolean> = spotifyRepository.authState
+    val authState: StateFlow<Token?> = spotifyRepository.authState
 
     val completeEvents: SharedFlow<Unit> = _completeEvents.asSharedFlow()
     val errorLikeEvents: SharedFlow<Unit> = _errorLikeEvents.asSharedFlow()
@@ -55,24 +56,35 @@ class TracksViewModel @Inject constructor(
         get() = mediaPlayer.duration
 
     init {
-        authState
-            .onEach { isAuthorized ->
-                coroutineScope {
-                    if (isAuthorized) {
+
+
+        viewModelScope.launch {
+            authState
+                .filterNotNull()
+                .map { it is Token.AccessToken }
+                .onEach { isAuthorized ->
+                    coroutineScope {
                         _loading.value = true
-                        launch {
-                            getTopTracksSeeds()
-                            getMoreRecommendations(10)
+                        if (isAuthorized) {
+                            launch {
+                                getTopTracksSeeds()
+                                getMoreRecommendations(10)
+                                _loading.value = false
+                            }
+                            launch {
+                                getMyUser()
+                            }
+                        } else {
+                            if (_user.value != null) {
+                                cleanData()
+                            }
                             _loading.value = false
-                        }
-                        launch {
-                            getMyUser()
                         }
                     }
                 }
-            }
-            .catch { e -> Log.i(TAG, e.stackTraceToString()) }
-            .launchIn(viewModelScope)
+                .catch { e -> Log.i(TAG, e.stackTraceToString()) }
+                .launchIn(viewModelScope)
+        }
 
         mediaPlayer.setOnCompletionListener {
             viewModelScope.launch { _completeEvents.emit(Unit) }
@@ -176,6 +188,16 @@ class TracksViewModel @Inject constructor(
     private suspend fun getMyUser() {
         val user = spotifyRepository.getMe()
         _user.value = user
+    }
+
+    private fun cleanData() {
+        _tracks.value = emptyList()
+        genreSeed = ""
+        artistSeed = ""
+        _user.value = null
+        trackSeeds.clear()
+        _playbackState.value = PlaybackState(isPlaying = false, firstPlay = false)
+        mediaPlayer.reset()
     }
 
     companion object {

@@ -28,7 +28,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tracks_toolbar"
-        app:shapeAppearance="@style/ShapeAppearance.App.MediumComponent.RoundCorners"
+        app:shapeAppearance="@style/ShapeAppearance.App.RoundCorners"
         tools:text="@string/get_spotify_free"
         tools:visibility="visible" />
 
@@ -136,6 +136,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:shapeAppearance="@style/ShapeAppearance.App.MediumComponent.RoundCorners" />
+        app:shapeAppearance="@style/ShapeAppearance.App.RoundCorners" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

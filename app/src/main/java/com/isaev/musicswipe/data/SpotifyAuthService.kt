@@ -6,7 +6,12 @@ import androidx.core.content.edit
 import com.isaev.musicswipe.Pkce
 import com.isaev.musicswipe.Token
 import com.isaev.musicswipe.di.UserModule
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
@@ -18,7 +23,8 @@ import javax.inject.Singleton
 @Singleton
 class SpotifyAuthService @Inject constructor(
     private val authApi: SpotifyAuthApi,
-    @Named(UserModule.USER_PREFS_NAME) private val userPrefs: SharedPreferences
+    @Named(UserModule.USER_PREFS_NAME) private val userPrefs: SharedPreferences,
+    private val externalScope: CoroutineScope
 ) {
 
     private lateinit var codeVerifier: String
@@ -28,7 +34,13 @@ class SpotifyAuthService @Inject constructor(
     private var refreshToken: String? = null
 
     val token: String get() = ((_token.value!!) as Token.AccessToken).token
-    val authState: Flow<Boolean> = _token.filterNotNull().map { it is Token.AccessToken }
+    val authState: StateFlow<Token?> = _token.asStateFlow()
+
+    init {
+        externalScope.launch {
+            refreshTokens()
+        }
+    }
 
     fun isAuthorized(): Boolean = _token.value is Token.AccessToken
 
@@ -67,11 +79,19 @@ class SpotifyAuthService @Inject constructor(
         }
     }
 
-    suspend fun refreshTokens() {
+    fun logOut() {
+        _token.value = Token.EmptyToken
+        userPrefs.edit {
+            remove(TOKEN_KEY)
+            remove(REFRESH_TOKEN_KEY)
+        }
+    }
+
+    private suspend fun refreshTokens() {
         val savedRefreshToken = userPrefs.getString(REFRESH_TOKEN_KEY, null)
 
         if (savedRefreshToken == null) {
-            _token.value = Token.EmptyToken
+            _token.update { Token.EmptyToken }
         } else {
             val response = authApi.refreshToken("refresh_token", savedRefreshToken, CLIENT_ID)
 

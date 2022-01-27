@@ -12,9 +12,10 @@ class MusicSwipeApp : Application() {
     val applicationScope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
     val daggerComponent: AppComponent =
         DaggerAppComponent.builder()
+            .appModule(AppModule(this))
             .authModule(AuthModule())
             .spotifyWebApiModule(SpotifyWebApiModule())
-            .userModule(UserModule(this))
+            .userModule(UserModule())
             .build()
 
 

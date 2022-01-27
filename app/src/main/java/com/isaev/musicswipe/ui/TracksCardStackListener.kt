@@ -11,7 +11,7 @@ class TracksCardStackListener(
     private val viewModel: TracksViewModel,
     private val cardStack: CardStackView,
     private inline val onPrepareTrack: () -> Unit,
-    private val getSavedInstanceState: () -> Bundle?
+    private inline val getSavedInstanceState: () -> Bundle?
 ) : CardStackListener {
     override fun onCardAppeared(view: View?, position: Int) {
         val savedInstanceState = getSavedInstanceState()

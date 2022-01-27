@@ -1,6 +1,7 @@
 package com.isaev.musicswipe.data
 
-import kotlinx.coroutines.flow.Flow
+import com.isaev.musicswipe.Token
+import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
 
@@ -9,7 +10,7 @@ class SpotifyRepository @Inject constructor(
     private val spotifyAuthService: SpotifyAuthService
 ) {
 
-    val authState: Flow<Boolean> = spotifyAuthService.authState
+    val authState: StateFlow<Token?> = spotifyAuthService.authState
 
     suspend fun getRecommendations(
         seedArtists: Array<String>,

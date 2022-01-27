@@ -7,4 +7,7 @@
     <string name="trunked_title">%s…</string>
     <string name="failed_like">Failed to like this track</string>
     <string name="login_with_spotify">Login with Spotify</string>
+    <string name="log_out">Log out</string>
+    <string name="wanna_log_out">Wanna log out?</string>
+    <string name="cancel">Cancel</string>
 </resources>

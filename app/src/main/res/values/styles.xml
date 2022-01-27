@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="ShapeAppearance.App.MediumComponent.RoundCorners" parent="ShapeAppearance.MaterialComponents.MediumComponent">
+    <style name="ShapeAppearance.App.RoundCorners" parent="ShapeAppearance.MaterialComponents">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>
     </style>

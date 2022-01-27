@@ -1,20 +1,17 @@
 package com.isaev.musicswipe.di
 
-import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
+import javax.inject.Singleton
 
 @Module
-class UserModule(app: Application) {
+class UserModule {
 
-    private val context: Context = app
 
-    @Provides
-    fun provideAppContext(): Context = context
-
+    @Singleton
     @Named(USER_PREFS_NAME)
     @Provides
     fun provideUserSharedPreferences(context: Context): SharedPreferences {

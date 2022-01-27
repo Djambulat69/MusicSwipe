@@ -25,6 +25,7 @@ import com.isaev.musicswipe.databinding.FragmentTracksBinding
 import com.yuyakaido.android.cardstackview.CardStackLayoutManager
 import com.yuyakaido.android.cardstackview.StackFrom
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -88,6 +89,20 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
             loginButton.setOnClickListener {
                 fragmentInteractor?.openLoginWebView()
             }
+
+            tracksToolbar.setOnMenuItemClickListener { menuItem ->
+                when (menuItem.itemId) {
+                    R.id.profile_menu_item -> {
+
+                        if (viewModel.user.value == null) return@setOnMenuItemClickListener true
+
+                        LogOutDialogFragment.newInstance(viewModel.user.value?.images?.lastOrNull()?.url)
+                            .show(parentFragmentManager, null)
+                        true
+                    }
+                    else -> false
+                }
+            }
         }
 
         progressAnimator = ObjectAnimator.ofInt(
@@ -101,17 +116,18 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
 
         viewModel.authState
             .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.CREATED)
+            .map { it is Token.AccessToken }
             .onEach { isAuthorized ->
                 with(binding) {
-//                    showPlayerUi(isAuthorized)
                     loginButton.isGone = isAuthorized
+                    showPlayerUi(isAuthorized && viewModel.loading.value == false)
                 }
             }
             .launchIn(viewLifecycleScope)
 
         viewModel.loading.observe(viewLifecycleOwner) { isLoading ->
             with(binding) {
-                showPlayerUi(!isLoading)
+                showPlayerUi(!isLoading && viewModel.authState.value is Token.AccessToken)
                 loadingCircle.isVisible = isLoading
             }
         }
@@ -142,22 +158,27 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
         }
 
         viewModel.user.observe(viewLifecycleOwner) { user ->
-            Glide.with(this)
-                .asDrawable()
-                .load(user.images.lastOrNull()?.url)
-                .circleCrop()
-                .into(
-                    object : CustomTarget<Drawable>() {
-                        override fun onLoadCleared(placeholder: Drawable?) {}
+            val profileMenuItem = binding.tracksToolbar.menu.findItem(R.id.profile_menu_item)
+            if (user == null) {
+                profileMenuItem.setIcon(R.drawable.ic_account_circle)
+            } else {
+                Glide.with(this)
+                    .asDrawable()
+                    .load(user.images.lastOrNull()?.url)
+                    .circleCrop()
+                    .into(
+                        object : CustomTarget<Drawable>() {
+                            override fun onLoadCleared(placeholder: Drawable?) {}
 
-                        override fun onResourceReady(
-                            profileIconDrawable: Drawable,
-                            transition: Transition<in Drawable>?
-                        ) {
-                            binding.tracksToolbar.menu.findItem(R.id.profile_menu_item).icon = profileIconDrawable
+                            override fun onResourceReady(
+                                profileIconDrawable: Drawable,
+                                transition: Transition<in Drawable>?
+                            ) {
+                                profileMenuItem.icon = profileIconDrawable
+                            }
                         }
-                    }
-                )
+                    )
+            }
         }
 
         viewLifecycleScope.launch {
