@@ -57,8 +57,7 @@ class TracksViewModel @Inject constructor(
     val user: LiveData<User> = _user
     val playbackState: LiveData<PlaybackState> = _playbackState
     val loading: LiveData<Boolean> = _loading
-    val authState: Flow<Boolean> =
-        spotifyRepository.authState.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val authState: Flow<Boolean> = spotifyRepository.authState
 
     val completeEvents: SharedFlow<Unit> = _completeEvents.asSharedFlow()
     val errorLikeEvents: SharedFlow<Unit> = _errorLikeEvents.asSharedFlow()
@@ -70,21 +69,22 @@ class TracksViewModel @Inject constructor(
         get() = mediaPlayer.duration
 
     init {
-        authState.onEach { isAuthorized ->
-            coroutineScope {
-                if (isAuthorized) {
-                    _loading.value = true
-                    launch {
-                        getTopTracksSeeds()
-                        getMoreRecommendations(10)
-                        _loading.value = false
-                    }
-                    launch {
-                        getMyUser()
+        authState
+            .onEach { isAuthorized ->
+                coroutineScope {
+                    if (isAuthorized) {
+                        _loading.value = true
+                        launch {
+                            getTopTracksSeeds()
+                            getMoreRecommendations(10)
+                            _loading.value = false
+                        }
+                        launch {
+                            getMyUser()
+                        }
                     }
                 }
             }
-        }
             .catch { e -> Log.i(TAG, e.stackTraceToString()) }
             .launchIn(viewModelScope)
     }

@@ -24,6 +24,7 @@ import com.isaev.musicswipe.data.Track
 import com.isaev.musicswipe.databinding.FragmentTracksBinding
 import com.yuyakaido.android.cardstackview.CardStackLayoutManager
 import com.yuyakaido.android.cardstackview.StackFrom
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -95,15 +96,10 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
 
         viewModel.authState
             .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.CREATED)
+            .debounce(300)
             .onEach { isAuthorized ->
                 with(binding) {
-                    cardStack.isVisible = isAuthorized
-                    playbackButton.isVisible = isAuthorized
-                    trackProgressCircle.isVisible = isAuthorized
-                    spotifyButton.isVisible = isAuthorized
-                    dislikeButton.isVisible = isAuthorized
-                    likeButton.isVisible = isAuthorized
-
+//                    showPlayerUi(isAuthorized)
                     loginButton.isGone = isAuthorized
                 }
             }
@@ -111,13 +107,7 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
 
         viewModel.loading.observe(viewLifecycleOwner) { isLoading ->
             with(binding) {
-                cardStack.isGone = isLoading
-                playbackButton.isGone = isLoading
-                trackProgressCircle.isGone = isLoading
-                spotifyButton.isGone = isLoading
-                dislikeButton.isGone = isLoading
-                likeButton.isGone = isLoading
-
+                showPlayerUi(!isLoading)
                 loadingCircle.isVisible = isLoading
             }
         }
@@ -290,6 +280,17 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
         progressAnimator?.setIntValues(0, requireContext().resources.getInteger(R.integer.trackProgressMax))
         progressAnimator?.duration = viewModel.duration.toLong()
         progressAnimator?.start()
+    }
+
+    private fun showPlayerUi(show: Boolean) {
+        with(binding) {
+            cardStack.isVisible = show
+            playbackButton.isVisible = show
+            trackProgressCircle.isVisible = show
+            spotifyButton.isVisible = show
+            dislikeButton.isVisible = show
+            likeButton.isVisible = show
+        }
     }
 
     companion object {

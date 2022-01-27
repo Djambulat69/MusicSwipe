@@ -5,10 +5,7 @@ import android.net.Uri
 import androidx.core.content.edit
 import com.isaev.musicswipe.Pkce
 import com.isaev.musicswipe.di.UserModule
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
@@ -30,7 +27,7 @@ class SpotifyAuthService @Inject constructor(
     private var refreshToken: String? = null
 
     val token: String get() = _token.value!!
-    val authState: Flow<Boolean> = _token.map { it != null }
+    val authState: Flow<Boolean> = _token.map { it != null }.drop(1)
 
     fun isAuthorized(): Boolean = _token.value != null
 
