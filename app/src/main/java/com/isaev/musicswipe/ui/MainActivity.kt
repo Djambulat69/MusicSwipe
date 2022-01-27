@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
-import androidx.lifecycle.lifecycleScope
 import com.isaev.musicswipe.R
 import com.isaev.musicswipe.data.SpotifyAuthService
 import com.isaev.musicswipe.databinding.ActivityMainBinding
@@ -28,15 +27,14 @@ class MainActivity : AppCompatActivity(), FragmentInteractor {
         setContentView(binding.root)
 
         if (savedInstanceState == null) {
-            lifecycleScope.launch {
+            supportFragmentManager.commit {
+                add(R.id.fragment_container, TracksFragment.newInstance(), null)
+            }
+            myApplication.applicationScope.launch {
                 try {
                     spotifyAuthService.refreshTokens()
                 } catch (e: Exception) {
                     Log.i(TAG, e.stackTraceToString())
-                } finally {
-                    supportFragmentManager.commit {
-                        add(R.id.fragment_container, TracksFragment.newInstance(), null)
-                    }
                 }
             }
         }

@@ -8,7 +8,6 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import com.isaev.musicswipe.R
 import com.isaev.musicswipe.data.SpotifyAuthService
 import com.isaev.musicswipe.databinding.FragmentWebViewBinding
@@ -43,18 +42,15 @@ class WebViewFragment : Fragment(R.layout.fragment_web_view) {
                     return if (url?.host == "music.swipe.com") {
                         val code = url.getQueryParameter("code")
                         if (code != null) {
-                            lifecycleScope.launch {
+                            myApplication.applicationScope.launch {
                                 try {
                                     spotifyAuthService.authorize(code)
                                 } catch (e: Exception) {
                                     Log.i(TAG, e.stackTraceToString())
-                                } finally {
-                                    fragmentInteractor?.back()
                                 }
                             }
-                        } else {
-                            fragmentInteractor?.back()
                         }
+                        fragmentInteractor?.back()
                         true
                     } else {
                         super.shouldOverrideUrlLoading(view, request)

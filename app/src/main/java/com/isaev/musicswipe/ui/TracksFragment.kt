@@ -14,6 +14,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
@@ -23,6 +24,8 @@ import com.isaev.musicswipe.data.Track
 import com.isaev.musicswipe.databinding.FragmentTracksBinding
 import com.yuyakaido.android.cardstackview.CardStackLayoutManager
 import com.yuyakaido.android.cardstackview.StackFrom
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
@@ -90,22 +93,21 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
             interpolator = LinearInterpolator()
         }
 
-        viewLifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.CREATED) {
-                viewModel.authState.collect { isAuthorized ->
-                    with(binding) {
-                        cardStack.isVisible = isAuthorized
-                        playbackButton.isVisible = isAuthorized
-                        trackProgressCircle.isVisible = isAuthorized
-                        spotifyButton.isVisible = isAuthorized
-                        dislikeButton.isVisible = isAuthorized
-                        likeButton.isVisible = isAuthorized
+        viewModel.authState
+            .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.CREATED)
+            .onEach { isAuthorized ->
+                with(binding) {
+                    cardStack.isVisible = isAuthorized
+                    playbackButton.isVisible = isAuthorized
+                    trackProgressCircle.isVisible = isAuthorized
+                    spotifyButton.isVisible = isAuthorized
+                    dislikeButton.isVisible = isAuthorized
+                    likeButton.isVisible = isAuthorized
 
-                        loginButton.isGone = isAuthorized
-                    }
+                    loginButton.isGone = isAuthorized
                 }
             }
-        }
+            .launchIn(viewLifecycleScope)
 
         viewModel.loading.observe(viewLifecycleOwner) { isLoading ->
             with(binding) {
