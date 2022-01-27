@@ -7,7 +7,7 @@ import dagger.Component
 import javax.inject.Singleton
 
 @Singleton
-@Component(modules = [SpotifyWebApiModule::class, AuthModule::class, UserModule::class])
+@Component(modules = [SpotifyWebApiModule::class, AuthModule::class, UserModule::class, MediaPlayerModule::class])
 interface AppComponent {
     fun inject(mainActivity: MainActivity)
     fun inject(tracksFragment: TracksFragment)
