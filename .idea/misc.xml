@@ -3,6 +3,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/Djamb/AndroidStudioProjects/MusicSwipe/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.177" />
         <entry key="..\:/Users/Djamb/AndroidStudioProjects/MusicSwipe/app/src/main/res/drawable/ic_account_circle.xml" value="0.2703125" />
         <entry key="..\:/Users/Djamb/AndroidStudioProjects/MusicSwipe/app/src/main/res/drawable/ic_baseline_album_placeholder.xml" value="0.2703125" />
         <entry key="..\:/Users/Djamb/AndroidStudioProjects/MusicSwipe/app/src/main/res/drawable/ic_baseline_music_note.xml" value="0.2703125" />
@@ -10,6 +11,8 @@
         <entry key="..\:/Users/Djamb/AndroidStudioProjects/MusicSwipe/app/src/main/res/drawable/ic_baseline_play_circle.xml" value="0.2703125" />
         <entry key="..\:/Users/Djamb/AndroidStudioProjects/MusicSwipe/app/src/main/res/drawable/ic_baseline_thumb_down.xml" value="0.2703125" />
         <entry key="..\:/Users/Djamb/AndroidStudioProjects/MusicSwipe/app/src/main/res/drawable/ic_baseline_thumb_up.xml" value="0.2703125" />
+        <entry key="..\:/Users/Djamb/AndroidStudioProjects/MusicSwipe/app/src/main/res/drawable/ic_launcher_background.xml" value="0.177" />
+        <entry key="..\:/Users/Djamb/AndroidStudioProjects/MusicSwipe/app/src/main/res/drawable/ic_music_swipe.xml" value="0.177" />
         <entry key="..\:/Users/Djamb/AndroidStudioProjects/MusicSwipe/app/src/main/res/layout/activity_main.xml" value="0.264" />
         <entry key="..\:/Users/Djamb/AndroidStudioProjects/MusicSwipe/app/src/main/res/layout/activity_web_view.xml" value="0.25416666666666665" />
         <entry key="..\:/Users/Djamb/AndroidStudioProjects/MusicSwipe/app/src/main/res/layout/card_stack_item.xml" value="0.25416666666666665" />
