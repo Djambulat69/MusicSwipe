@@ -1,5 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
-<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-  <background android:drawable="@mipmap/ic_music_swipe_adaptive_back"/>
-  <foreground android:drawable="@mipmap/ic_music_swipe_adaptive_fore"/>
-</adaptive-icon>
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="200dp"
+    android:height="200dp" android:viewportWidth="512" android:viewportHeight="512">
+    <path android:fillColor="#191414" android:pathData="M0,0h512v512h-512z"/>
+    <path android:fillColor="#1db954" android:pathData="M157.31,126.6L308.66,126.6A18,18 0,0 1,326.66 144.6L326.66,369.17A18,18 0,0 1,308.66 387.17L157.31,387.17A18,18 0,0 1,139.31 369.17L139.31,144.6A18,18 0,0 1,157.31 126.6z"/>
+    <path android:fillColor="#1db954" android:pathData="M179.323,372.443L236.158,155.184A18,18 63.41,0 1,258.128 142.325L404.55,180.629A18,18 126.184,0 1,417.409 202.599L360.574,419.858A18,18 59.475,0 1,338.605 432.716L192.182,394.412A18,18 59.475,0 1,179.323 372.443z"/>
+    <path android:fillColor="#00000000"
+        android:pathData="M179.323,372.443L236.158,155.184A18,18 63.41,0 1,258.128 142.325L404.55,180.629A18,18 126.184,0 1,417.409 202.599L360.574,419.858A18,18 59.475,0 1,338.605 432.716L192.182,394.412A18,18 59.475,0 1,179.323 372.443z"
+        android:strokeWidth="19" android:strokeColor="#191414"/>
+</vector>
