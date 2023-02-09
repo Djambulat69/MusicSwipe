@@ -67,4 +67,6 @@ dependencies {
     // Dagger
     implementation 'com.google.dagger:dagger:2.40.5'
     kapt 'com.google.dagger:dagger-compiler:2.40.5'
+    // AppAuth
+    implementation 'net.openid:appauth:0.11.1'
 }
