@@ -14,6 +14,7 @@ import com.isaev.musicswipe.data.User
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import net.openid.appauth.AuthorizationRequest
 import java.util.*
 import javax.inject.Inject
 
@@ -159,6 +160,8 @@ class TracksViewModel @Inject constructor(
             }
         }
     }
+
+    fun getAuthRequest(): AuthorizationRequest = spotifyRepository.getAuthRequest()
 
     private suspend fun getMoreRecommendations(limit: Int) {
         val recommendations = spotifyRepository.getRecommendations(

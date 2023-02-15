@@ -12,6 +12,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import net.openid.appauth.AuthorizationRequest
+import net.openid.appauth.AuthorizationServiceConfiguration
+import net.openid.appauth.ResponseTypeValues
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
@@ -64,6 +67,23 @@ class SpotifyAuthService @Inject constructor(
             .toString()
     }
 
+    fun getAuthRequest(): AuthorizationRequest {
+        val config = AuthorizationServiceConfiguration(
+            Uri.parse("${BASE_URL}authorize"),
+            Uri.parse("${BASE_URL}api/token")
+        )
+
+        val authRequest = AuthorizationRequest.Builder(
+            config,
+            CLIENT_ID,
+            ResponseTypeValues.CODE,
+            Uri.parse(REDIRECT_URI)
+        ).setScope("user-top-read user-read-private")
+            .build()
+
+        return authRequest
+    }
+
     suspend fun authorize(authCode: String) {
         val response = authApi.requestToken(
             "authorization_code", authCode, REDIRECT_URI, CLIENT_ID, codeVerifier
@@ -112,7 +132,7 @@ class SpotifyAuthService @Inject constructor(
         private const val REFRESH_TOKEN_KEY = "refresh_token_key"
 
         private const val CLIENT_ID = "ff565d0979aa4da5810b5f3d55057c8f"
-        private const val REDIRECT_URI = "http://music.swipe.com"
+        private const val REDIRECT_URI = "com.music.swipe://login"
     }
 }
 

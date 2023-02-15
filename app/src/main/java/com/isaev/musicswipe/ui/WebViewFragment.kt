@@ -1,6 +1,7 @@
 package com.isaev.musicswipe.ui
 
 import android.content.Context
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -15,6 +16,8 @@ import com.isaev.musicswipe.fragmentInteractor
 import com.isaev.musicswipe.myApplication
 import com.isaev.musicswipe.viewLifecycleScope
 import kotlinx.coroutines.launch
+import net.openid.appauth.AuthState
+import net.openid.appauth.AuthorizationServiceConfiguration
 import javax.inject.Inject
 
 class WebViewFragment : Fragment(R.layout.fragment_web_view) {

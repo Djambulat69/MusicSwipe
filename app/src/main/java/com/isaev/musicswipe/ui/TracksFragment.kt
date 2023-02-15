@@ -8,8 +8,10 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.animation.LinearInterpolator
+import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -28,6 +30,11 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import net.openid.appauth.AuthState
+import net.openid.appauth.AuthorizationException
+import net.openid.appauth.AuthorizationResponse
+import net.openid.appauth.AuthorizationService
+import java.net.URI
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -86,8 +93,16 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
                     viewModel.onPlayClicked()
                 }
             }
+
             loginButton.setOnClickListener {
-                fragmentInteractor?.openLoginWebView()
+//                fragmentInteractor?.openLoginWebView()
+
+
+                val authRequest = viewModel.getAuthRequest()
+                val authService = AuthorizationService(requireContext())
+                val authIntent = authService.getAuthorizationRequestIntent(authRequest)
+
+                startActivityForResult(authIntent, 0)
             }
 
             tracksToolbar.setOnMenuItemClickListener { menuItem ->
@@ -315,6 +330,19 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
             spotifyButton.isVisible = show
             dislikeButton.isVisible = show
             likeButton.isVisible = show
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (data == null) return
+
+        if (requestCode == 0) {
+            val resp = AuthorizationResponse.fromIntent(data)
+            val ex = AuthorizationException.fromIntent(data)
+
+            AuthState(resp, ex)
+
+            Log.i(TAG, "token=${resp?.accessToken.orEmpty()}", ex)
         }
     }
 
