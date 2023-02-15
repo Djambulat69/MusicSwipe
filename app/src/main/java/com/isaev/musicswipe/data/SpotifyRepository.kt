@@ -34,6 +34,8 @@ class SpotifyRepository @Inject constructor(
 
     suspend fun getMe(): User = spotifyRemote.getMe()
 
+    suspend fun authorize(authCode: String, codeVerifier: String) = spotifyAuthService.authorize(authCode, codeVerifier)
+
     companion object {
         const val TAG = "SpotifyRepository"
     }

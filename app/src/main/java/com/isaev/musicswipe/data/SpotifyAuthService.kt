@@ -84,7 +84,8 @@ class SpotifyAuthService @Inject constructor(
         return authRequest
     }
 
-    suspend fun authorize(authCode: String) {
+    suspend fun authorize(authCode: String, codeVerifier: String) {
+
         val response = authApi.requestToken(
             "authorization_code", authCode, REDIRECT_URI, CLIENT_ID, codeVerifier
         )

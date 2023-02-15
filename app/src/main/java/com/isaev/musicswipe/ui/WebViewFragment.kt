@@ -47,7 +47,7 @@ class WebViewFragment : Fragment(R.layout.fragment_web_view) {
                         if (code != null) {
                             myApplication.applicationScope.launch {
                                 try {
-                                    spotifyAuthService.authorize(code)
+//                                    spotifyAuthService.authorize(code)
                                 } catch (e: Exception) {
                                     Log.i(TAG, e.stackTraceToString())
                                 }

@@ -17,6 +17,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
@@ -340,7 +341,14 @@ class TracksFragment : Fragment(R.layout.fragment_tracks) {
             val resp = AuthorizationResponse.fromIntent(data)
             val ex = AuthorizationException.fromIntent(data)
 
-            AuthState(resp, ex)
+            val authCode = resp?.authorizationCode
+            val codeVerifier = resp?.request?.codeVerifier
+
+            if (authCode != null && codeVerifier != null) {
+                lifecycleScope.launch {
+                    viewModel.authorize(authCode, codeVerifier)
+                }
+            }
 
             Log.i(TAG, "token=${resp?.accessToken.orEmpty()}", ex)
         }

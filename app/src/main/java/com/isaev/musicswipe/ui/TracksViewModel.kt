@@ -163,6 +163,7 @@ class TracksViewModel @Inject constructor(
 
     fun getAuthRequest(): AuthorizationRequest = spotifyRepository.getAuthRequest()
 
+    suspend fun authorize(authCode: String, codeVerifier: String) = spotifyRepository.authorize(authCode, codeVerifier)
     private suspend fun getMoreRecommendations(limit: Int) {
         val recommendations = spotifyRepository.getRecommendations(
             arrayOf(artistSeed),
